@@ -1,25 +1,522 @@
 <!DOCTYPE html>
-
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <title>Server Error</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Error · TaskFlow</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8edf5 50%, #f0f4f9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Subtle background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(220, 38, 38, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(220, 38, 38, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Floating decorative elements */
+        .bg-decoration {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.04;
+            pointer-events: none;
+        }
+
+        .bg-decoration-1 {
+            width: 400px;
+            height: 400px;
+            background: #dc2626;
+            top: -100px;
+            right: -100px;
+            animation: float-deco 25s ease-in-out infinite;
+        }
+
+        .bg-decoration-2 {
+            width: 300px;
+            height: 300px;
+            background: #dc2626;
+            bottom: -80px;
+            left: -80px;
+            animation: float-deco 20s ease-in-out infinite reverse;
+        }
+
+        @keyframes float-deco {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+
+        .error-container {
+            position: relative;
+            z-index: 1;
+            max-width: 560px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 54px 48px 48px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.06),
+                0 8px 20px rgba(0, 0, 0, 0.02),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .error-container:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 30px 80px rgba(0, 0, 0, 0.08),
+                0 10px 30px rgba(0, 0, 0, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        /* Icon container */
+        .icon-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .error-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 88px;
+            height: 88px;
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
+            border-radius: 50%;
+            border: 2px solid rgba(220, 38, 38, 0.15);
+            position: relative;
+        }
+
+        .error-icon i {
+            font-size: 40px;
+            color: #dc2626;
+        }
+
+        /* Pulse ring */
+        .pulse-ring {
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 2px solid rgba(220, 38, 38, 0.15);
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        /* Status code */
+        .status-code {
+            font-size: 96px;
+            font-weight: 800;
+            line-height: 1;
+            color: #1a2639;
+            letter-spacing: -0.03em;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .status-code .code-text {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Title */
+        .error-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a2639;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .error-subtitle {
+            font-size: 15px;
+            color: #6b7280;
+            margin-bottom: 28px;
+            line-height: 1.6;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Error details */
+        .error-details {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .error-details .label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            margin-bottom: 6px;
+        }
+
+        .error-details .value {
+            font-size: 13px;
+            color: #1a2639;
+            font-family: 'Inter', monospace;
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        /* Message box */
+        .error-message {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 32px;
+            color: #495057;
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 400;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .error-message i {
+            color: #dc2626;
+            font-size: 16px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .error-message span {
+            flex: 1;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 28px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            border: none;
+            position: relative;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a7fe0, #3a6bc0);
+            color: white;
+            box-shadow: 0 4px 16px rgba(74, 127, 224, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(74, 127, 224, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0px);
+        }
+
+        .btn-secondary {
+            background: #f1f3f5;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            border-color: #ced4da;
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.25);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+        }
+
+        .btn-danger:active {
+            transform: translateY(0px);
+        }
+
+        /* Footer */
+        .footer-links {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-size: 13px;
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-links a:hover {
+            color: #4a7fe0;
+        }
+
+        .footer-links a i {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* Help text */
+        .help-text {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        /* Notification badge */
+        .notification-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12px;
+            color: #991b1b;
+            margin-bottom: 20px;
+        }
+
+        .notification-badge i {
+            color: #dc2626;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .error-container {
+                padding: 36px 24px 32px;
+                border-radius: 20px;
+            }
+
+            .status-code {
+                font-size: 68px;
+            }
+
+            .error-icon {
+                width: 72px;
+                height: 72px;
+            }
+
+            .error-icon i {
+                font-size: 32px;
+            }
+
+            .error-title {
+                font-size: 22px;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 13px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .error-message {
+                font-size: 13px;
+                padding: 14px 16px;
+            }
+
+            .footer-links {
+                gap: 16px;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .error-details {
+                padding: 12px 16px;
+            }
+
+            .error-details .value {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .error-container {
+                padding: 28px 16px 24px;
+            }
+
+            .status-code {
+                font-size: 52px;
+            }
+
+            .notification-badge {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<h1>500</h1>
+<!-- Decorative background elements -->
+<div class="bg-decoration bg-decoration-1"></div>
+<div class="bg-decoration bg-decoration-2"></div>
 
-<h2>Internal Server Error</h2>
+<div class="error-container">
+    <!-- Icon -->
+    <div class="icon-wrapper">
+        <div class="error-icon">
+            <span class="pulse-ring"></span>
+            <i class="fas fa-exclamation-circle"></i>
+        </div>
+    </div>
 
-<p th:text="${message}">
-    Something went wrong.
-</p>
+    <!-- Status Code -->
+    <div class="status-code">
+        <span class="code-text">500</span>
+    </div>
 
-<a th:href="@{/dashboard}">
-    Go Dashboard
-</a>
+    <!-- Title -->
+    <h1 class="error-title">Internal Server Error</h1>
+    <p class="error-subtitle">Something went wrong on our side. We're working to fix it.</p>
+
+    <!-- Notification -->
+    <div class="notification-badge">
+        <i class="fas fa-clock"></i>
+        <span>Our team has been notified. We'll resolve this shortly.</span>
+    </div>
+
+    <!-- Error Details (shows only in development) -->
+    <div class="error-details" th:if="${#environments.acceptsProfiles('dev') or #environments.acceptsProfiles('local')}">
+        <div class="label">
+            <i class="fas fa-code"></i> Error Details
+        </div>
+        <div class="value" th:text="${message} ?: 'No additional details available'">
+            No additional details available
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-message" th:if="${message}">
+        <i class="fas fa-info-circle"></i>
+        <span th:text="${message}">An unexpected error occurred while processing your request.</span>
+    </div>
+    <div class="error-message" th:unless="${message}">
+        <i class="fas fa-info-circle"></i>
+        <span>An unexpected error occurred while processing your request. Please try again later.</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <button onclick="window.location.reload()" class="btn btn-primary">
+            <i class="fas fa-sync-alt"></i>
+            Retry
+        </button>
+        <a th:href="@{/dashboard}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Dashboard
+        </a>
+        <a href="javascript:history.back()" class="btn btn-secondary">
+            <i class="fas fa-undo-alt"></i>
+            Go Back
+        </a>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="footer-links">
+        <a href="#">
+            <i class="fas fa-life-ring"></i>
+            Report Issue
+        </a>
+        <a th:href="@{/contact}">
+            <i class="fas fa-envelope"></i>
+            Contact Support
+        </a>
+        <a th:href="@{/status}">
+            <i class="fas fa-heartbeat"></i>
+            Service Status
+        </a>
+    </div>
+
+    <!-- Help text -->
+    <div class="help-text">
+        <i class="fas fa-lightbulb" style="margin-right: 6px; opacity: 0.5;"></i>
+        Try refreshing the page or contact support if the issue persists.
+    </div>
+</div>
 
 </body>
-
 </html>
