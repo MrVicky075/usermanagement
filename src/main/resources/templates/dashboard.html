@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+
+    <title>Dashboard</title>
+
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet"
+          th:href="@{/css/style.css}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="navbar">
+
+        <h2>User Management</h2>
+
+        <form th:action="@{/logout}"
+              method="post">
+
+            <button type="submit">
+                Logout
+            </button>
+
+        </form>
+
+    </div>
+
+    <hr>
+
+    <h2>Dashboard</h2>
+
+    <div class="user-info">
+
+        <p>
+            <strong>User ID:</strong>
+
+            <span th:text="${userSession.userId}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Name:</strong>
+
+            <span th:text="${userSession.userName}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Email:</strong>
+
+            <span th:text="${userSession.email}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Mobile:</strong>
+
+            <span th:text="${userSession.mobileNo}">
+            </span>
+        </p>
+
+        <p>
+            <strong>Role:</strong>
+
+            <span th:text="${userSession.role}">
+            </span>
+        </p>
+
+    </div>
+
+    <hr>
+
+    <div sec:authorize="hasRole('ADMIN')">
+
+        <a th:href="@{/users}">
+            Manage Users
+        </a>
+
+    </div>
+
+    <h3>User List</h3>
+
+    <table>
+
+        <thead>
+
+        <tr>
+
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr th:each="user : ${users}">
+
+            <td th:text="${user.userId}">
+            </td>
+
+            <td th:text="${user.userName}">
+            </td>
+
+            <td th:text="${user.email}">
+            </td>
+
+            <td th:text="${user.mobileNo}">
+            </td>
+
+            <td th:text="${user.role}">
+            </td>
+
+            <td>
+
+                <span th:if="${user.isActive}">
+                    Active
+                </span>
+
+                <span th:unless="${user.isActive}">
+                    Inactive
+                </span>
+
+            </td>
+
+            <td>
+
+                <div sec:authorize="hasRole('ADMIN')">
+
+                    <a th:href="@{/users/edit/{id}(id=${user.userId})}">
+                        Edit
+                    </a>
+
+                    |
+
+                    <a th:href="@{/users/view/{id}(id=${user.userId})}">
+                        View
+                    </a>
+
+                    |
+
+                    <form
+                            th:action="@{/users/status/{id}(id=${user.userId})}"
+                            method="post"
+                            style="display:inline">
+
+                        <button type="submit">
+
+                            <span th:if="${user.isActive}">
+                                Make Inactive
+                            </span>
+
+                            <span th:unless="${user.isActive}">
+                                Make Active
+                            </span>
+
+                        </button>
+
+                    </form>
+
+                    |
+
+                    <form
+                            th:action="@{/users/delete/{id}(id=${user.userId})}"
+                            method="post"
+                            style="display:inline">
+
+                        <button type="submit">
+                            Delete
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</body>
+
+</html>

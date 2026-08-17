@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Bad Request</title>
+</head>
+
+<body>
+
+<h1>400</h1>
+
+<h2>Bad Request</h2>
+
+<p th:text="${message}">
+    Invalid request.
+</p>
+
+<a th:href="@{/dashboard}">
+    Go Dashboard
+</a>
+
+</body>
+
+</html>

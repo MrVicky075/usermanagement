@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manifest — Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+  :root{
+    --navy-deep:#0c1526;
+    --navy:#152238;
+    --navy-mid:#1c3050;
+    --kraft:#e7d9b9;
+    --kraft-line:#c9b78d;
+    --cream:#faf5e9;
+    --paper:#fffdf7;
+    --stamp:#a5372a;
+    --stamp-dark:#7f291f;
+    --gold:#c9a227;
+    --ink:#232320;
+    --slate:#6b6355;
+    --slate-light:#a89f8c;
+    --error:#b3261e;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'IBM Plex Sans', sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+  }
+
+  .screen{
+    display:grid;
+    grid-template-columns:1.05fr 1fr;
+    min-height:100vh;
+  }
+
+  /* ---------- LEFT PANEL ---------- */
+  .brand-panel{
+    position:relative;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(201,162,39,0.14), transparent 40%),
+      linear-gradient(160deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color:var(--kraft);
+    padding:56px 56px 44px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    overflow:hidden;
+  }
+
+  .brand-panel::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 28px);
+    pointer-events:none;
+  }
+
+  .brand-mark{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    position:relative;
+    z-index:2;
+  }
+  .brand-mark .glyph{
+    font-size:26px;
+    line-height:1;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,0.4));
+  }
+  .brand-mark .word{
+    font-family:'Roboto Slab', serif;
+    font-weight:700;
+    font-size:17px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--kraft);
+  }
+  .brand-mark .word span{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.22em;
+    color:var(--gold);
+    font-weight:400;
+    margin-top:3px;
+  }
+
+  .hero{
+    position:relative;
+    z-index:2;
+    margin:34px 0 8px;
+  }
+  .hero-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:14px;
+  }
+  .hero h1{
+    font-family:'Roboto Slab', serif;
+    font-weight:600;
+    font-size:38px;
+    line-height:1.22;
+    margin:0 0 18px;
+    color:#f4ecda;
+    max-width:9.5em;
+  }
+  .hero p{
+    font-size:14.5px;
+    line-height:1.7;
+    color:var(--slate-light);
+    max-width:34ch;
+    margin:0;
+  }
+
+  /* Stacked ticket stubs illustration */
+  .stub-stack{
+    position:relative;
+    z-index:2;
+    margin-top:38px;
+    height:190px;
+  }
+  .stub{
+    position:absolute;
+    width:280px;
+    background:var(--kraft);
+    border:1px solid var(--kraft-line);
+    border-radius:4px;
+    padding:12px 16px;
+    box-shadow:0 10px 22px rgba(0,0,0,0.35);
+    color:var(--ink);
+  }
+  .stub .row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .stub .req{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.05em;
+    color:var(--slate);
+  }
+  .stub .title{
+    font-family:'Roboto Slab', serif;
+    font-weight:600;
+    font-size:13.5px;
+    margin-top:6px;
+    color:var(--ink);
+  }
+  .stamp-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    font-weight:500;
+    letter-spacing:0.08em;
+    padding:3px 7px;
+    border-radius:3px;
+    border:1.5px solid currentColor;
+    transform:rotate(-4deg);
+  }
+  .stub--1{ top:0; left:0; z-index:3; }
+  .stub--1 .stamp-badge{ color:var(--stamp); }
+  .stub--2{ top:34px; left:46px; z-index:2; opacity:0.88; transform:rotate(1.5deg); }
+  .stub--2 .stamp-badge{ color:var(--gold); }
+  .stub--3{ top:68px; left:92px; z-index:1; opacity:0.7; transform:rotate(-1.2deg); }
+  .stub--3 .stamp-badge{ color:var(--slate); }
+
+  .panel-footer{
+    position:relative;
+    z-index:2;
+    display:flex;
+    gap:36px;
+    padding-top:24px;
+    border-top:1px solid rgba(231,217,185,0.18);
+  }
+  .stat b{
+    display:block;
+    font-family:'Roboto Slab', serif;
+    font-size:20px;
+    color:#f4ecda;
+  }
+  .stat span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--slate-light);
+  }
+
+  /* ---------- RIGHT PANEL ---------- */
+  .form-panel{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px;
+    background:var(--cream);
+  }
+
+  .slip{
+    position:relative;
+    width:100%;
+    max-width:392px;
+    background:var(--paper);
+    border:1px solid #e6dcc4;
+    border-radius:10px;
+    padding:40px 38px 34px;
+    box-shadow:0 18px 40px rgba(20,20,10,0.08);
+  }
+  /* perforated top edge */
+  .slip::before{
+    content:"";
+    position:absolute;
+    top:-1px; left:14px; right:14px;
+    height:1px;
+    background-image:radial-gradient(circle, #d8cba5 1.6px, transparent 1.7px);
+    background-size:12px 100%;
+    background-repeat:repeat-x;
+  }
+
+  .slip-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:6px;
+  }
+  .slip-head .tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.14em;
+    color:var(--slate-light);
+    text-transform:uppercase;
+  }
+  .slip h2{
+    font-family:'Roboto Slab', serif;
+    font-weight:600;
+    font-size:25px;
+    margin:2px 0 6px;
+    color:var(--ink);
+  }
+  .slip .sub{
+    font-size:13.5px;
+    color:var(--slate);
+    margin:0 0 30px;
+  }
+
+  .field{
+    margin-bottom:20px;
+  }
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--slate);
+    margin-bottom:7px;
+  }
+  .field input{
+    width:100%;
+    padding:12px 13px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:#fffefb;
+    border:1.5px solid #ddd2b4;
+    border-radius:6px;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input::placeholder{ color:#b7ac93; }
+  .field input:focus{
+    border-color:var(--navy-mid);
+    box-shadow:0 0 0 3px rgba(28,48,80,0.1);
+  }
+  .field input.invalid{
+    border-color:var(--error);
+    box-shadow:0 0 0 3px rgba(179,38,30,0.08);
+  }
+
+  .row-between{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:-6px 0 26px;
+  }
+  .remember{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:12.5px;
+    color:var(--slate);
+  }
+  .remember input{ accent-color:var(--navy-mid); }
+  .forgot{
+    font-size:12.5px;
+    color:var(--navy-mid);
+    text-decoration:none;
+    font-weight:500;
+  }
+  .forgot:hover{ text-decoration:underline; }
+
+  .error-banner{
+    display:none;
+    align-items:flex-start;
+    gap:8px;
+    background:#fbeceb;
+    border:1px solid #f0c6c2;
+    color:var(--error);
+    font-size:12.5px;
+    line-height:1.5;
+    padding:10px 12px;
+    border-radius:6px;
+    margin-bottom:18px;
+  }
+  .error-banner.show{ display:flex; }
+
+  .stamp-btn{
+    width:100%;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:14px 18px;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:500;
+    font-size:12.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:#f6ede0;
+    background:linear-gradient(180deg, var(--stamp) 0%, var(--stamp-dark) 100%);
+    border:none;
+    border-radius:7px;
+    cursor:pointer;
+    box-shadow:0 8px 18px rgba(165,55,42,0.32);
+    transition:transform .12s ease, box-shadow .12s ease, opacity .15s ease;
+  }
+  .stamp-btn:hover{ transform:translateY(-1px); box-shadow:0 10px 22px rgba(165,55,42,0.38); }
+  .stamp-btn:active{ transform:translateY(1px) scale(0.99); }
+  .stamp-btn:disabled{ opacity:0.65; cursor:default; transform:none; }
+
+  .spinner{
+    width:14px; height:14px;
+    border:2px solid rgba(246,237,224,0.4);
+    border-top-color:#f6ede0;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    display:none;
+  }
+  .stamp-btn.loading .spinner{ display:inline-block; }
+  .stamp-btn.loading .btn-text{ display:none; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .slip-footer{
+    text-align:center;
+    margin-top:22px;
+    font-size:12.5px;
+    color:var(--slate);
+  }
+  .slip-footer a{ color:var(--navy-mid); text-decoration:none; font-weight:500; }
+  .slip-footer a:hover{ text-decoration:underline; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 900px){
+    .screen{ grid-template-columns:1fr; }
+    .brand-panel{ display:none; }
+    .form-panel{ padding:28px 18px; }
+  }
+
+  :focus-visible{ outline:2px solid var(--navy-mid); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<div class="screen">
+
+    <!-- LEFT: brand / illustration panel -->
+    <div class="brand-panel">
+        <div class="brand-mark">
+            <span class="glyph">🐯</span>
+            <span class="word">Task Management
+        <span>eProcurement Technology</span>
+      </span>
+        </div>
+
+        <div class="hero">
+            <div class="hero-eyebrow">Requisition Control</div>
+            <h1>Every RFQ, Auction and&nbsp;PO, Task tracked and close.</h1>
+            <p>Sign in to review assigned tasks, move items through the three‑way match, and keep every ticket on schedule.</p>
+        </div>
+
+        <div class="stub-stack">
+            <div class="stub stub--3">
+                <div class="row"><span class="req">REQ‑2291</span><span class="stamp-badge">P3</span></div>
+                <div class="title">Requirement Issue — Vendor 118</div>
+            </div>
+            <div class="stub stub--2">
+                <div class="row"><span class="req">REQ‑2304</span><span class="stamp-badge">P2</span></div>
+                <div class="title">CR Approval — Steel Coils</div>
+            </div>
+            <div class="stub stub--1">
+                <div class="row"><span class="req">REQ‑2318</span><span class="stamp-badge">P1</span></div>
+                <div class="title">Production Issue — Q3 Packaging</div>
+            </div>
+        </div>
+
+        <div class="panel-footer">
+            <div class="stat"><b>128</b><span>Open Tasks</span></div>
+            <div class="stat"><b>34</b><span>Due Today</span></div>
+            <div class="stat"><b>99.2%</b><span>On‑Time Close</span></div>
+        </div>
+    </div>
+
+    <!-- RIGHT: login form -->
+    <div class="form-panel">
+        <div class="slip">
+            <div class="slip-head">
+                <span class="tag">Access Slip</span>
+            </div>
+            <h2>Sign in</h2>
+            <p class="sub">Enter your credentials to open the dashboard.</p>
+
+            <!-- Error/Success messages from Spring Security -->
+            <div class="error-banner" id="errorBanner">
+                <span id="errorText"></span>
+            </div>
+
+            <!-- Standard HTML form - works with Spring Security -->
+            <form action="/login" method="post" id="loginForm" novalidate>
+                <!-- CSRF token - required for Spring Security -->
+                <input type="hidden" name="_csrf" value="${_csrf.token}" />
+
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="developer@localmail.com" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+
+                <div class="row-between">
+                    <label class="remember">
+
+                    </label>
+                    <a href="#" class="forgot" id="forgotLink">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="stamp-btn" id="submitBtn">
+                    <span class="btn-text">Authorize Sign In</span>
+                </button>
+            </form>
+
+            <div class="slip-footer">
+                Need access? <a href="#">Contact your administrator</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+  // Check for error or logout parameters (Spring Security style)
+  const urlParams = new URLSearchParams(window.location.search);
+  const errorBanner = document.getElementById('errorBanner');
+  const errorText = document.getElementById('errorText');
+
+  function showError(message, isSuccess = false) {
+    errorText.textContent = message;
+    errorBanner.classList.add('show');
+    if (isSuccess) {
+      errorBanner.style.background = '#e8f5e9';
+      errorBanner.style.borderColor = '#a5d6a7';
+      errorText.style.color = '#2e7d32';
+    } else {
+      errorBanner.style.background = '#fbeceb';
+      errorBanner.style.borderColor = '#f0c6c2';
+      errorText.style.color = 'var(--error)';
+    }
+  }
+
+  if (urlParams.get('error')) {
+    showError('Invalid email or password. Please try again.');
+  }
+
+  if (urlParams.get('logout')) {
+    showError('You have been logged out successfully.', true);
+  }
+
+  // Handle forgot password link
+  document.getElementById('forgotLink')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    showError('Password reset link has been sent to your email.', true);
+    setTimeout(() => {
+      errorBanner.classList.remove('show');
+    }, 4000);
+  });
+
+  // Clear error banner when user starts typing
+  document.getElementById('email')?.addEventListener('input', function() {
+    errorBanner.classList.remove('show');
+  });
+  document.getElementById('password')?.addEventListener('input', function() {
+    errorBanner.classList.remove('show');
+  });
+
+  // Form validation
+  document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email || !password) {
+      e.preventDefault();
+      showError('Please enter both email and password.');
+      return false;
+    }
+    return true;
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <title>Add User</title>
+
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet"
+          th:href="@{/css/style.css}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>Add User</h2>
+
+    <form th:action="@{/users/save}"
+          th:object="${user}"
+          method="post">
+
+        <div class="form-field">
+
+            <label>User Name</label>
+
+            <input type="text"
+                   th:field="*{userName}">
+
+            <span class="error"
+                  th:errors="*{userName}">
+            </span>
+
+        </div>
+
+        <div class="form-field">
+
+            <label>Email</label>
+
+            <input type="email"
+                   th:field="*{email}">
+
+            <span class="error"
+                  th:errors="*{email}">
+            </span>
+
+        </div>
+
+        <div class="form-field">
+
+            <label>Password</label>
+
+            <input type="password"
+                   th:field="*{password}"
+                   required>
+
+        </div>
+
+        <div class="form-field">
+
+            <label>Mobile No</label>
+
+            <input type="text"
+                   th:field="*{mobileNo}">
+
+        </div>
+
+        <div class="form-field">
+
+            <label>Role</label>
+
+            <select th:field="*{role}">
+
+                <option value="">
+                    -- Select Role --
+                </option>
+
+                <option value="ADMIN">
+                    Admin
+                </option>
+
+                <option value="SR_DEVELOPER">
+                    Sr. Developer
+                </option>
+
+                <option value="DEVELOPER">
+                    Developer
+                </option>
+
+            </select>
+
+        </div>
+
+        <button type="submit">
+            Save
+        </button>
+
+        <a th:href="@{/users}">
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+</body>
+
+</html>

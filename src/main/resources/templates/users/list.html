@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <title>User List</title>
+
+    <meta charset="UTF-8">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>User Management</h2>
+
+    <a th:href="@{/users/add}">
+        Add User
+    </a>
+
+    <br><br>
+
+    <table border="1">
+
+        <thead>
+
+        <tr>
+
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Mobile</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created On</th>
+            <th>Action</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr th:each="user : ${users}">
+
+            <td th:text="${user.userId}"></td>
+
+            <td th:text="${user.userName}"></td>
+
+            <td th:text="${user.email}"></td>
+
+            <td th:text="${user.mobileNo}"></td>
+
+            <td th:text="${user.role}"></td>
+
+            <td>
+
+                <span th:if="${user.isActive}">
+                    Active
+                </span>
+
+                <span th:unless="${user.isActive}">
+                    Inactive
+                </span>
+
+            </td>
+
+            <td th:text="${user.createdOn}"></td>
+
+            <td>
+
+                <a th:href="@{/users/view/{id}(id=${user.userId})}">
+                    View
+                </a>
+
+                |
+
+                <a th:href="@{/users/edit/{id}(id=${user.userId})}">
+                    Edit
+                </a>
+
+                |
+
+                <a th:href="@{/users/change-password/{id}(id=${user.userId})}">
+                    Change Password
+                </a>
+
+                |
+
+                <form
+                        th:action="@{/users/status/{id}(id=${user.userId})}"
+                        method="post"
+                        style="display:inline">
+
+                    <button type="submit">
+
+                        <span th:if="${user.isActive}">
+                            Inactive
+                        </span>
+
+                        <span th:unless="${user.isActive}">
+                            Active
+                        </span>
+
+                    </button>
+
+                </form>
+
+                |
+
+                <form
+                        th:action="@{/users/delete/{id}(id=${user.userId})}"
+                        method="post"
+                        style="display:inline">
+
+                    <button type="submit">
+                        Delete
+                    </button>
+
+                </form>
+
+            </td>
+
+        </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</body>
+
+</html>
