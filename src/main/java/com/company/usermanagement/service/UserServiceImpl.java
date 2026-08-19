@@ -82,11 +82,13 @@ public class UserServiceImpl implements UserService{
     @Override
     public void changePassword(Long userId, ChangePasswordDTO request) {
         UserEntity entity = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User not found"+userId));
-        if(!passwordEncoder.matches(request.getOldPassword(),entity.getPassword())){
-            throw new BusinessException("Old password is incorrect");
-        }
-        if(!passwordEncoder.matches(request.getOldPassword(),request.getConfirmPassword())){
-            throw new BusinessException("New password and confirm password do not match");
+        if(request.getMode().equalsIgnoreCase("user")){
+            if(!passwordEncoder.matches(request.getOldPassword(),entity.getPassword())){
+                throw new BusinessException("Old password is incorrect");
+            }
+            if(!passwordEncoder.matches(request.getOldPassword(),request.getConfirmPassword())){
+                throw new BusinessException("New password and confirm password do not match");
+            }
         }
         entity.setPassword(passwordEncoder.encode(request.getNewPassword()));
         entity.setUpdatedOn(LocalDateTime.now());
