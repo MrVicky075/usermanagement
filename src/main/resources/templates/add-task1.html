@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Tracker · Add Task</title>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e8edf5 0%, #d5dee8 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            margin: 0;
+        }
+
+        .page-container {
+            width: 100%;
+            max-width: 860px;
+        }
+
+        /* ===== MAIN CARD ===== */
+        .form-card {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 2.8rem 3rem;
+            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.15), 0 8px 24px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 640px) {
+            .form-card {
+                padding: 1.8rem 1.2rem;
+                border-radius: 24px;
+            }
+        }
+
+        /* ===== HEADER ===== */
+        .form-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem 1.5rem;
+            margin-bottom: 2.2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .form-header .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .form-header .header-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1a2e44, #2a4a6a);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .form-header h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #0b1a2e;
+        }
+
+        .form-header h2 span {
+            font-weight: 400;
+            color: #6b7f94;
+            font-size: 1rem;
+        }
+
+        .btn-back {
+            background: #f0f2f5;
+            color: #1e2f44;
+            border: none;
+            padding: 0.6rem 1.4rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            border: 1px solid transparent;
+        }
+
+        .btn-back:hover {
+            background: #e5e8ed;
+            border-color: #d0d5dd;
+            transform: translateX(-2px);
+        }
+
+        .btn-back i {
+            font-size: 0.85rem;
+        }
+
+        /* ===== FORM ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem 1.8rem;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .form-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-field label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #4a5f77;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .form-field label i {
+            color: #2a7de1;
+            font-size: 0.8rem;
+            width: 16px;
+        }
+
+        .form-field label .required {
+            color: #d14545;
+            font-size: 0.9rem;
+        }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            background: #f7f9fc;
+            border: 2px solid #e8ecf2;
+            border-radius: 14px;
+            padding: 0.7rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #0b1a2e;
+            outline: none;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            width: 100%;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            border-color: #2a7de1;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(42, 125, 225, 0.08);
+        }
+
+        .form-field input::placeholder,
+        .form-field textarea::placeholder {
+            color: #9aafc7;
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+
+        .form-field textarea {
+            min-height: 80px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .form-field select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234a5f77' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.2rem center;
+            padding-right: 2.8rem;
+        }
+
+        /* ===== CHARACTER COUNTER ===== */
+        .hint {
+            font-size: 0.7rem;
+            color: #7b91ab;
+            text-align: right;
+            margin-top: 0.1rem;
+            font-weight: 500;
+        }
+
+        /* ===== ERROR TEXT ===== */
+        .error-text {
+            color: #d14545;
+            font-size: 0.75rem;
+            font-weight: 500;
+            min-height: 1.2rem;
+            margin-top: 0.1rem;
+        }
+
+        /* ===== DIVIDER ===== */
+        .form-divider {
+            grid-column: 1 / -1;
+            border: none;
+            border-top: 2px dashed #e8ecf2;
+            margin: 0.2rem 0 0.6rem;
+        }
+
+        /* ===== ACTIONS ===== */
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2.2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #f0f2f5;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.7rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a2e44, #2a4a6a);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(26, 46, 68, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(26, 46, 68, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f2f5;
+            color: #1e2f44;
+            border: 1px solid #d5dce6;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e8ed;
+            border-color: #b8c5d5;
+        }
+
+        .btn i {
+            font-size: 1rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+            .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .form-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .form-header .btn-back {
+                align-self: flex-start;
+            }
+            .form-header h2 {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-card {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0f2f5;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c0c8d4;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0aab8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+  <div class="form-card">
+
+    <!-- ===== HEADER ===== -->
+    <div class="form-header">
+      <div class="header-left">
+        <div class="header-icon">
+          <i class="fas fa-pen-fancy"></i>
+        </div>
+        <div>
+          <h2 id="modalTitle" th:text="${task.taskId} ? 'Edit Task' : 'Add Task'">
+            Add Task
+            <span th:if="${task.taskId}"> · Update existing</span>
+            <span th:unless="${task.taskId}"> · Create new</span>
+          </h2>
+        </div>
+      </div>
+      <button class="btn-back" id="backBtn" th:onclick="|location.href='@{/dashboard}'|">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+    </div>
+
+    <!-- ===== FORM ===== -->
+    <form th:action="@{/tasks/saveTask}" th:object="${task}" method="post" id="taskForm">
+
+      <div class="form-grid">
+
+        <!-- ===== Assigned ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-user-tie"></i> Assigned <span class="required">*</span></label>
+          <select id="f_assignId" th:field="*{assignUserId}">
+            <option value="">-- Select user --</option>
+            <option th:each="user : ${assignedUsersList}"
+                    th:value="${user.userId}"
+                    th:text="${user.username}"
+                    th:selected="${user.userId == task.assignUserId}">
+            </option>
+          </select>
+        </div>
+
+        <!-- ===== Priority ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-flag"></i> Priority</label>
+          <select id="f_priority" th:field="*{priority}">
+            <option th:each="item : ${prioritiesList}"
+                    th:value="${item.key}"
+                    th:text="${item.value}">
+            </option>
+          </select>
+        </div>
+
+        <!-- ===== Client Name ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-building"></i> Client Name <span class="required">*</span></label>
+          <input type="text" id="f_client" th:field="*{clientName}" placeholder="Enter client name" />
+        </div>
+
+        <!-- ===== Issue ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-tag"></i> Issue</label>
+          <select id="f_issue" th:field="*{issue}">
+            <option value="">-- Select Issue --</option>
+            <option th:each="issue : ${issueTypeList}"
+                    th:value="${issue.key}"
+                    th:text="${issue.value}">
+            </option>
+          </select>
+        </div>
+
+        <!-- ===== Redmine ID ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-hashtag"></i> Redmine ID</label>
+          <input type="text" id="f_redmine" th:field="*{redmineId}" placeholder="e.g. 521420" />
+          <div class="error-text" id="redmineError" th:if="${#fields.hasErrors('redmineId')}"
+               th:errors="*{redmineId}">Error message</div>
+        </div>
+
+        <!-- ===== Days ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-clock"></i> Days</label>
+          <input type="number" id="f_days" th:field="*{days}" min="0" placeholder="Number of days" />
+        </div>
+
+        <!-- ===== Requirement ===== -->
+        <div class="form-field full">
+          <label><i class="fas fa-file-alt"></i> Requirement</label>
+          <textarea id="f_requirement" th:field="*{requirement}" maxlength="2000" placeholder="Describe the requirement..."></textarea>
+          <div class="hint" id="reqHint" th:text="*{requirement?.length() ?: 0} + ' / 2000'">0 / 2000</div>
+        </div>
+
+        <!-- ===== Task Details ===== -->
+        <div class="form-field full">
+          <label><i class="fas fa-list-check"></i> Task Details</label>
+          <textarea id="f_details" th:field="*{taskDetails}" placeholder="Provide detailed task description..."></textarea>
+        </div>
+
+        <!-- ===== Divider ===== -->
+        <hr class="form-divider" />
+
+        <!-- ===== Status ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-circle"></i> Status</label>
+          <select id="f_status" th:field="*{status}">
+            <option value="">-- Select Status --</option>
+            <option th:each="status : ${statusList}"
+                    th:value="${status.key}"
+                    th:text="${status.value}"
+                    th:selected="${status.key == task.status}">
+            </option>
+          </select>
+        </div>
+
+
+        <!-- ===== Fixed On ===== -->
+        <div class="form-field">
+          <label><i class="fas fa-server"></i> Fixed On</label>
+          <select id="f_fixedOn" th:field="*{fixedOn}">
+            <option value="">-- Select Fixed On --</option>
+            <option th:each="item : ${fixedOns}"
+                    th:value="${item.key}"
+                    th:text="${item.value}">
+            </option>
+          </select>
+        </div>
+
+        <!-- ===== Remarks ===== -->
+        <div class="form-field full">
+          <label><i class="fas fa-comment"></i> Remarks</label>
+          <textarea id="f_remarks" th:field="*{remarks}" placeholder="Add any additional remarks..."></textarea>
+        </div>
+
+        <!-- ===== Hidden ID ===== -->
+        <input type="hidden" th:field="*{taskId}" />
+
+      </div>
+
+      <!-- ===== ACTIONS ===== -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" id="cancelBtn" th:onclick="|location.href='@{/dashboard}'|">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" id="saveBtn">
+          <i class="fas fa-save"></i>
+          <span th:text="${task.taskId} ? 'Update Task' : 'Save Task'">Save Task</span>
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+    (function() {
+        // Character counter for requirement field
+        const reqTextarea = document.getElementById('f_requirement');
+        const reqHint = document.getElementById('reqHint');
+
+        if (reqTextarea && reqHint) {
+            function updateCounter() {
+                const len = reqTextarea.value.length;
+                reqHint.textContent = len + ' / 2000';
+                if (len > 1900) {
+                    reqHint.style.color = '#d14545';
+                } else {
+                    reqHint.style.color = '#7b91ab';
+                }
+            }
+
+            reqTextarea.addEventListener('input', updateCounter);
+            updateCounter();
+        }
+
+        // Focus first field with error
+        const errorField = document.querySelector('.error-text');
+        if (errorField && errorField.textContent.trim() !== '') {
+            const firstInput = document.querySelector('.form-field input, .form-field select, .form-field textarea');
+            if (firstInput) firstInput.focus();
+        }
+
+        // Update title for edit mode
+        const taskIdInput = document.querySelector('input[name="taskId"]');
+        if (taskIdInput && taskIdInput.value && taskIdInput.value !== '') {
+            const titleEl = document.getElementById('modalTitle');
+            if (titleEl && titleEl.textContent.includes('Add Task')) {
+                titleEl.innerHTML = 'Edit Task <span>· Update existing</span>';
+            }
+        }
+    })();
+</script>
+
+</body>
+</html>

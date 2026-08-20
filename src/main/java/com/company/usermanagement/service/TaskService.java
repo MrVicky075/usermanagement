@@ -1,0 +1,21 @@
+package com.company.usermanagement.service;
+
+import com.company.usermanagement.dto.TaskDTO;
+import com.company.usermanagement.entity.TaskEntity;
+
+import java.util.List;
+
+public interface TaskService {
+
+        TaskDTO saveTask(TaskDTO taskDTO);
+        public List<TaskEntity> saveAll(List<TaskEntity> tasks);
+
+        TaskDTO getTaskById(Long taskId);
+
+        List<TaskDTO> getAllTasks();
+
+        TaskDTO updateTask(Long taskId, TaskDTO taskDTO);
+
+        void deleteTask(Long taskId);
+        List<TaskDTO> getFilteredTasks(String assignedTo, String issueType, String priority, String status, String fixedOn);
+}

@@ -1,0 +1,58 @@
+package com.company.usermanagement.constraint;
+
+import lombok.NoArgsConstructor;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+@NoArgsConstructor
+public final class AppConstants {
+
+    // Fixed On
+    public static Map<String, String> getFixedOnList() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("-", "-");
+        map.put("LOCAL", "LOCAL");
+        map.put("UAT", "UAT");
+        map.put("PRODUCTION", "PRODUCTION");
+        return map;
+    }
+
+    // Priority
+    public static Map<String,String > getPriorityList(){
+        Map<String,String> map = new LinkedHashMap<>();
+        map.put("-","-");
+        map.put("P1","P1");
+        map.put("P2","P2");
+        map.put("P3","P3");
+        map.put("P4","P4");
+        map.put("P5","P5");
+        return map;
+    }
+
+    // Issue Type
+    public static Map<String,String > getIssueTypeList(){
+        Map<String,String> map = new LinkedHashMap<>();
+        map.put("-", "-");
+        map.put("Bug", "Bug");
+        map.put("Change Request", "Change Request");
+        map.put("Production Task","Production Task");
+        map.put("Email", "Email");
+        map.put("Production Issue", "Production Issue");
+        map.put("Other", "Other");
+        return map;
+    }
+
+    public static Map<String, String> getStatusList() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("-", "-");
+        map.put("New Task", "New Task");
+        map.put("Assigned", "Assigned");
+        map.put("Working", "Working");
+        map.put("Complete", "Complete");
+        map.put("Hold", "Hold");
+        return map;
+    }
+
+
+}
