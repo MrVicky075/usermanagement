@@ -44,7 +44,10 @@ public class TaskDTO {
     @Size(max = 2000, message = "Remarks must be less than 2000 characters")
     private String remarks;
 
-    private String isActive;
+    private Boolean isActive;
+
+    private Long createBy;
+    private Long updatedBy;
 
     private LocalDateTime createAt;
     private LocalDateTime updateAt;

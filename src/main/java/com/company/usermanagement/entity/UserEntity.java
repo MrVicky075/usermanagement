@@ -49,7 +49,8 @@ public class UserEntity {
     public enum UserRole{
         ADMIN,
         SR_DEVELOPER,
-        DEVELOPER
+        DEVELOPER,
+        SUPPORT
     }
 
 }

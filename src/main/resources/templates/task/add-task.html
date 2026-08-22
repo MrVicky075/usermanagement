@@ -183,6 +183,26 @@
             box-shadow: 0 0 0 4px rgba(42, 125, 225, 0.08);
         }
 
+        /* ===== VALIDATION STYLES ===== */
+        #f_assignId.error {
+            border-color: #d14545;
+            background: #fff8f8;
+        }
+
+        #f_assignId.error:focus {
+            border-color: #d14545;
+            box-shadow: 0 0 0 4px rgba(209, 69, 69, 0.1);
+        }
+
+        #f_assignId.success {
+            border-color: #2e9b5e;
+            background: #f8fffb;
+        }
+
+        .form-field.shake {
+            animation: shake 0.4s ease;
+        }
+
         .form-field input::placeholder,
         .form-field textarea::placeholder {
             color: #9aafc7;
@@ -221,6 +241,10 @@
             font-weight: 500;
             min-height: 1.2rem;
             margin-top: 0.1rem;
+        }
+
+        .error-text.hidden {
+            display: none;
         }
 
         /* ===== DIVIDER ===== */
@@ -271,6 +295,12 @@
             transform: translateY(0);
         }
 
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-secondary {
             background: #f0f2f5;
             color: #1e2f44;
@@ -284,6 +314,32 @@
 
         .btn i {
             font-size: 1rem;
+        }
+
+        /* ===== TOAST MESSAGE ===== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #d14545;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 24px rgba(209, 69, 69, 0.3);
+            transform: translateX(120%);
+            transition: transform 0.4s ease;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast i {
+            margin-right: 0.5rem;
         }
 
         /* ===== RESPONSIVE ===== */
@@ -323,6 +379,12 @@
             }
         }
 
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
         .form-card {
             animation: fadeInUp 0.5s ease forwards;
         }
@@ -346,6 +408,12 @@
 </head>
 <body>
 
+<!-- ===== TOAST MESSAGE ===== -->
+<div id="toast" class="toast">
+  <i class="fas fa-exclamation-circle"></i>
+  <span id="toastMessage">Please select an assigned user</span>
+</div>
+
 <div class="page-container">
   <div class="form-card">
 
@@ -368,28 +436,30 @@
       </button>
     </div>
 
-    <!-- ===== FORM ===== -->
-    <form th:action="@{/tasks/saveTask}" th:object="${task}" method="post" id="taskForm">
+    <!-- ===== FORM - WITH ACTION URL ===== -->
+    <form th:action="@{/tasks/saveTask}" th:object="${task}" method="post" id="taskForm" novalidate>
 
       <div class="form-grid">
 
-        <!-- ===== Assigned ===== -->
-        <div class="form-field">
+        <!-- ===== Assigned - ONLY THIS FIELD HAS VALIDATION ===== -->
+        <div class="form-field" id="field-assigned">
           <label><i class="fas fa-user-tie"></i> Assigned <span class="required">*</span></label>
           <select id="f_assignId" th:field="*{assignUserId}">
             <option value="">-- Select user --</option>
             <option th:each="user : ${assignedUsersList}"
                     th:value="${user.userId}"
-                    th:text="${user.username}"
+                    th:text="${user.userName}"
                     th:selected="${user.userId == task.assignUserId}">
             </option>
           </select>
+          <div class="error-text hidden" id="error-assigned">Please select an assigned user</div>
         </div>
 
         <!-- ===== Priority ===== -->
         <div class="form-field">
           <label><i class="fas fa-flag"></i> Priority</label>
           <select id="f_priority" th:field="*{priority}">
+            <option value="">-- Select Priority --</option>
             <option th:each="item : ${prioritiesList}"
                     th:value="${item.key}"
                     th:text="${item.value}">
@@ -399,7 +469,7 @@
 
         <!-- ===== Client Name ===== -->
         <div class="form-field">
-          <label><i class="fas fa-building"></i> Client Name <span class="required">*</span></label>
+          <label><i class="fas fa-building"></i> Client Name</label>
           <input type="text" id="f_client" th:field="*{clientName}" placeholder="Enter client name" />
         </div>
 
@@ -419,8 +489,6 @@
         <div class="form-field">
           <label><i class="fas fa-hashtag"></i> Redmine ID</label>
           <input type="text" id="f_redmine" th:field="*{redmineId}" placeholder="e.g. 521420" />
-          <div class="error-text" id="redmineError" th:if="${#fields.hasErrors('redmineId')}"
-               th:errors="*{redmineId}">Error message</div>
         </div>
 
         <!-- ===== Days ===== -->
@@ -457,7 +525,6 @@
             </option>
           </select>
         </div>
-
 
         <!-- ===== Fixed On ===== -->
         <div class="form-field">
@@ -498,10 +565,84 @@
   </div>
 </div>
 
-<!-- ===== JAVASCRIPT ===== -->
+<!-- ===== JAVASCRIPT - VALIDATION WITH FORM SUBMISSION ===== -->
 <script>
     (function() {
-        // Character counter for requirement field
+        'use strict';
+
+        // ===== DOM REFERENCES =====
+        const form = document.getElementById('taskForm');
+        const saveBtn = document.getElementById('saveBtn');
+        const assignedSelect = document.getElementById('f_assignId');
+        const errorElement = document.getElementById('error-assigned');
+        const fieldContainer = document.getElementById('field-assigned');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // ===== VALIDATE ASSIGNED FIELD =====
+        function validateAssigned() {
+            const value = assignedSelect.value;
+            const isValid = value && value !== '';
+
+            if (!isValid) {
+                assignedSelect.classList.add('error');
+                assignedSelect.classList.remove('success');
+                errorElement.classList.remove('hidden');
+                fieldContainer.classList.add('shake');
+                setTimeout(() => {
+                    fieldContainer.classList.remove('shake');
+                }, 400);
+            } else {
+                assignedSelect.classList.remove('error');
+                assignedSelect.classList.add('success');
+                errorElement.classList.add('hidden');
+            }
+
+            return isValid;
+        }
+
+        // ===== SHOW TOAST =====
+        function showToast(message) {
+            toastMessage.textContent = message || 'Please select an assigned user';
+            toast.classList.add('show');
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // ===== EVENT LISTENERS =====
+
+        // Real-time validation on change
+        assignedSelect.addEventListener('change', validateAssigned);
+
+        // Validate on blur
+        assignedSelect.addEventListener('blur', validateAssigned);
+
+        // ===== FORM SUBMIT - VALIDATE BEFORE SUBMISSION =====
+        form.addEventListener('submit', function(e) {
+            const isValid = validateAssigned();
+
+            if (!isValid) {
+                // Prevent form submission if validation fails
+                e.preventDefault();
+                showToast('Please select an assigned user');
+
+                // Scroll to the field
+                fieldContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                assignedSelect.focus();
+            } else {
+                // Validation passed - form will submit to action URL
+                // Show loading state on button
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                // Allow form to submit naturally
+                // The form will submit to: /tasks/saveTask
+                console.log('✅ Validation passed! Submitting form to:', form.action);
+            }
+        });
+
+        // ===== CHARACTER COUNTER =====
         const reqTextarea = document.getElementById('f_requirement');
         const reqHint = document.getElementById('reqHint');
 
@@ -520,14 +661,7 @@
             updateCounter();
         }
 
-        // Focus first field with error
-        const errorField = document.querySelector('.error-text');
-        if (errorField && errorField.textContent.trim() !== '') {
-            const firstInput = document.querySelector('.form-field input, .form-field select, .form-field textarea');
-            if (firstInput) firstInput.focus();
-        }
-
-        // Update title for edit mode
+        // ===== UPDATE TITLE FOR EDIT MODE =====
         const taskIdInput = document.querySelector('input[name="taskId"]');
         if (taskIdInput && taskIdInput.value && taskIdInput.value !== '') {
             const titleEl = document.getElementById('modalTitle');
@@ -535,6 +669,15 @@
                 titleEl.innerHTML = 'Edit Task <span>· Update existing</span>';
             }
         }
+
+        // ===== INITIAL VALIDATION CHECK =====
+        if (assignedSelect.value && assignedSelect.value !== '') {
+            assignedSelect.classList.add('success');
+        }
+
+        console.log('🚀 Form loaded with validation on "Assigned" field only.');
+        console.log('📤 Form will submit to:', form.action);
+
     })();
 </script>
 

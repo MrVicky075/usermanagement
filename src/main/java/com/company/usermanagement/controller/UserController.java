@@ -1,5 +1,6 @@
 package com.company.usermanagement.controller;
 
+import com.company.usermanagement.constraint.AppConstants;
 import com.company.usermanagement.dto.ChangePasswordDTO;
 import com.company.usermanagement.dto.UserRequestDTO;
 import com.company.usermanagement.dto.UserResponseDTO;
@@ -27,6 +28,7 @@ public class UserController {
     @GetMapping("/add")
     public String addPage(Model model){
         model.addAttribute("user", new UserRequestDTO());
+        model.addAttribute("roleList", AppConstants.getUserRoles());
         return "users/user-form";
     }
 
@@ -42,6 +44,7 @@ public class UserController {
     @GetMapping("/edit/{id}")
     public String editPage(@PathVariable Long id, Model model){
         model.addAttribute("user",userService.getUserById(id));
+        model.addAttribute("roleList", AppConstants.getUserRoles());
         return "users/user-edit";
     }
 
@@ -63,31 +66,6 @@ public class UserController {
     @PostMapping("/status/{id}")
     public String changeStatus(@PathVariable Long id){
         userService.changeActiveStatus(id);
-        return "redirect:/users";
-    }
-
-    @GetMapping("/change-password/{id}")
-    public String changePasswordPage(@PathVariable("id") Long id, @RequestParam(value="mode", defaultValue="admin") String mode, Model model){
-        String retVal="redirect:/users";
-        model.addAttribute("userId",id);
-        ChangePasswordDTO changePassword = new ChangePasswordDTO(); changePassword.setMode(mode);
-        model.addAttribute("changePassword", changePassword);
-
-        if(mode.equalsIgnoreCase("admin")){
-            retVal= "users/change-password-admin";
-        }else {
-            retVal= "users/change-password";
-        }
-        return retVal;
-    }
-
-    @PostMapping("/change-password/{id}")
-    public String changePassword(@PathVariable Long id, @Valid @ModelAttribute("changePassword") ChangePasswordDTO request,BindingResult result){
-        System.out.println(result.getAllErrors());
-        if(result.hasErrors()){
-            return "users/change-password";
-        }
-        userService.changePassword(id,request);
         return "redirect:/users";
     }
 

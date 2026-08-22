@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management · TaskFlow</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f4f7fc;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 10px rgba(0, 0, 0, 0.02);
+            padding: 1.8rem;
+            max-width: 1550px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: #0b1a33;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title small {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: #5e6f8d;
+            margin-left: 0.5rem;
+        }
+
+        .card-title i {
+            color: #4a7fe0;
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.5rem;
+            background: linear-gradient(135deg, #4a7fe0, #3a6bc0);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(74, 127, 224, 0.25);
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(74, 127, 224, 0.35);
+        }
+
+        .btn-add i {
+            font-size: 0.875rem;
+        }
+
+        .search-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.2rem;
+            padding: 0.8rem 1rem;
+            background: #f8faff;
+            border-radius: 12px;
+            border: 1px solid #e9edf4;
+        }
+
+        .search-group {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex: 1;
+            min-width: 90px;
+            max-width: 140px;
+        }
+
+        .search-group label {
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #5e6f8d;
+            white-space: nowrap;
+            letter-spacing: 0.04em;
+            min-width: 14px;
+        }
+
+        .search-group input,
+        .search-group select {
+            padding: 0.3rem 0.5rem;
+            border: 1px solid #dae1ed;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            width: 100%;
+            outline: none;
+            transition: all 0.2s ease;
+            color: #1a2c4a;
+            height: 28px;
+        }
+
+        .search-group input:focus,
+        .search-group select:focus {
+            border-color: #4a7fe0;
+            box-shadow: 0 0 0 3px rgba(74, 127, 224, 0.08);
+        }
+
+        .search-group input::placeholder {
+            color: #9aafc7;
+            font-size: 0.65rem;
+        }
+
+        .search-group.date-range {
+            max-width: 180px;
+            min-width: 130px;
+        }
+
+        .search-group.date-range input {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.4rem;
+        }
+
+        .search-actions {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .btn-clear {
+            padding: 0.3rem 0.8rem;
+            border: 1px solid #dae1ed;
+            border-radius: 6px;
+            background: white;
+            color: #5e6f8d;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-clear:hover {
+            background: #f0f2f5;
+            border-color: #b8c5d5;
+        }
+
+        .btn-search {
+            padding: 0.3rem 1rem;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #4a7fe0, #3a6bc0);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 127, 224, 0.3);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid #e9edf4;
+            background: #ffffff;
+            max-height: 520px;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            min-width: 1350px;
+            table-layout: auto;
+        }
+
+        .table thead th {
+            background: #f8faff;
+            color: #1a2c4a;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 0.8rem 0.8rem;
+            border-bottom: 2px solid #d7e0ec;
+            text-align: left;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .table thead th:hover {
+            background: #edf2f9;
+        }
+
+        .table thead th .sort-icon {
+            margin-left: 0.3rem;
+            font-size: 0.6rem;
+            opacity: 0.4;
+            transition: all 0.2s ease;
+        }
+
+        .table thead th:hover .sort-icon {
+            opacity: 0.8;
+        }
+
+        .table thead th .sort-icon.active {
+            opacity: 1;
+            color: #4a7fe0;
+        }
+
+        .table tbody td {
+            padding: 0.6rem 0.7rem;
+            border-bottom: 1px solid #eef2f8;
+            vertical-align: middle;
+            color: #1e2f4a;
+            background-color: #ffffff;
+            font-size: 0.8rem;
+        }
+
+        .table tbody tr:hover td {
+            background-color: #fafcff;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: capitalize;
+            border: 1px solid transparent;
+        }
+
+        .badge-status-NEW { background: #e3f0ff; color: #1d5f9e; border-color: #c2ddff; }
+        .badge-status-ASSIGNED { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .badge-status-WORKING { background: #fdebd8; color: #b15e1e; border-color: #f9d4b8; }
+        .badge-status-COMPLETE { background: #e3f9ec; color: #1a6e4b; border-color: #b8edd0; }
+        .badge-status-HOLD { background: #ffe9ec; color: #b13e4b; border-color: #ffd6db; }
+        .badge-status-CLOSED { background: #e5e7eb; color: #4b5563; border-color: #d1d5db; }
+
+        .badge-priority-P1 { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+        .badge-priority-P2 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .badge-priority-P3 { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+        .badge-priority-P4 { background: #e5e7eb; color: #4b5563; border-color: #d1d5db; }
+        .badge-priority-P5 { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+
+        .badge-fixedOn-LOCAL { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
+        .badge-fixedOn-UAT { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+        .badge-fixedOn-PRODUCTION { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+        .badge-fixedOn-PROD { background: #d1fae5; color: #065f46; border-color: #a7f3d0; }
+
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+        }
+
+        .action-btn i {
+            font-size: 0.65rem;
+        }
+
+        .action-btn-edit {
+            color: #f59e0b;
+            border-color: #fde68a;
+            background: #fffbeb;
+        }
+
+        .action-btn-edit:hover {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            transform: translateY(-1px);
+        }
+
+        .action-btn-delete {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .action-btn-delete:hover {
+            background: #fecaca;
+            border-color: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .action-divider {
+            color: #d0dae9;
+            font-weight: 300;
+        }
+
+        .custom-footer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #38507a;
+            padding: 0.8rem 0.2rem 0 0.2rem;
+            border-top: 1px solid #eef2f8;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .footer-btn {
+            padding: 0.3rem 1rem;
+            border: 1px solid #d0dae9;
+            border-radius: 6px;
+            background: white;
+            color: #1a2c4a;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .footer-btn:hover:not(.active):not(:disabled) {
+            background: #f8faff;
+            border-color: #a7bde0;
+        }
+
+        .footer-btn.active {
+            background: #4a7fe0;
+            color: white;
+            border-color: #4a7fe0;
+            cursor: default;
+        }
+
+        .footer-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .footer-btn:disabled:hover {
+            background: white;
+            border-color: #d0dae9;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.2rem;
+            background: #f7faff;
+            color: #2a436e;
+            border: 1px solid #ccd7e9;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-back:hover {
+            background: #edf4ff;
+            border-color: #b0c4e2;
+            transform: translateY(-2px);
+        }
+
+        .btn-back i {
+            font-size: 0.8rem;
+        }
+
+        .text-truncate {
+            max-width: 100px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+        }
+
+        .pagination-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: #38507a;
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                padding: 1rem;
+            }
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-add {
+                justify-content: center;
+            }
+            .table thead th,
+            .table tbody td {
+                padding: 0.4rem 0.4rem;
+                font-size: 0.65rem;
+            }
+            .table {
+                min-width: 1100px;
+            }
+            .action-btn {
+                padding: 0.15rem 0.3rem;
+                font-size: 0.55rem;
+            }
+            .custom-footer-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            .header-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+            .btn-back,
+            .btn-add {
+                flex: 1;
+                justify-content: center;
+            }
+            .search-bar {
+                flex-direction: column;
+                gap: 0.4rem;
+            }
+            .search-group {
+                max-width: 100%;
+                min-width: 100%;
+            }
+            .search-actions {
+                margin-left: 0;
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .search-group.date-range {
+                max-width: 100%;
+                min-width: 100%;
+            }
+            .pagination-info {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-title {
+                font-size: 1.2rem;
+            }
+            .action-group {
+                gap: 0.1rem;
+            }
+            .action-divider {
+                display: none;
+            }
+            .action-btn {
+                font-size: 0.5rem;
+                padding: 0.1rem 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <!-- Card Header -->
+    <div class="card-header">
+        <h4 class="card-title">
+            <i class="fas fa-tasks"></i>
+            Task Management
+            <small th:text="'· ' + ${#lists.size(tasksList)} + ' tasks'">· 0 tasks</small>
+        </h4>
+        <div class="header-actions">
+            <a th:href="@{/dashboard}" class="btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+            <a th:href="@{/tasks/taskForm}" class="btn-add">
+                <i class="fas fa-plus-circle"></i>
+                Add Task
+            </a>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar" id="searchBar">
+        <div class="search-group">
+            <label><i class="fas fa-hashtag"></i></label>
+            <input type="text" id="searchTaskId" placeholder="TSK-1" onkeyup="filterTable()" />
+        </div>
+        <div class="search-group">
+            <label><i class="fas fa-building"></i></label>
+            <input type="text" id="searchClient" placeholder="Client" onkeyup="filterTable()" />
+        </div>
+        <div class="search-group">
+            <label><i class="fas fa-file-alt"></i></label>
+            <input type="text" id="searchRequirement" placeholder="Requirement" onkeyup="filterTable()" />
+        </div>
+        <div class="search-group">
+            <label><i class="fas fa-user"></i></label>
+            <input type="text" id="searchAssigned" placeholder="Assigned To" onkeyup="filterTable()" />
+        </div>
+        <div class="search-group">
+            <label><i class="fas fa-flag"></i></label>
+            <select id="searchPriority" onchange="filterTable()">
+                <option value="">Priority</option>
+                <option value="P1">P1</option>
+                <option value="P2">P2</option>
+                <option value="P3">P3</option>
+                <option value="P4">P4</option>
+                <option value="P5">P5</option>
+            </select>
+        </div>
+        <div class="search-group">
+            <label><i class="fas fa-circle"></i></label>
+            <select id="searchStatus" onchange="filterTable()">
+                <option value="">Status</option>
+                <option value="New Task">New Task</option>
+                <option value="Assigned">Assigned</option>
+                <option value="Working">Working</option>
+                <option value="Complete">Complete</option>
+                <option value="Hold">Hold</option>
+                <option value="-">-</option>
+            </select>
+        </div>
+        <div class="search-group">
+            <label><i class="fas fa-tag"></i></label>
+            <input type="text" id="searchIssue" placeholder="Issue" onkeyup="filterTable()" />
+        </div>
+        <div class="search-group">
+            <label><i class="fas fa-server"></i></label>
+            <select id="searchFixedOn" onchange="filterTable()">
+                <option value="">Fixed On</option>
+                <option value="LOCAL">LOCAL</option>
+                <option value="UAT">UAT</option>
+                <option value="PRODUCTION">PRODUCTION</option>
+                <option value="PROD">PROD</option>
+            </select>
+        </div>
+        <div class="search-group date-range">
+            <label><i class="fas fa-calendar-alt"></i></label>
+            <input type="date" id="searchDateFrom" placeholder="From" onchange="filterTable()" title="Date From" />
+        </div>
+        <div class="search-group date-range">
+            <label><i class="fas fa-calendar-alt"></i></label>
+            <input type="date" id="searchDateTo" placeholder="To" onchange="filterTable()" title="Date To" />
+        </div>
+        <div class="search-actions">
+            <button class="btn-clear" onclick="clearFilters()">
+                <i class="fas fa-times"></i> Clear
+            </button>
+            <button class="btn-search" onclick="filterTable()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table" id="taskTable">
+            <thead>
+            <tr>
+                <th onclick="sortTable(0)">
+                    Task ID <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(1)">
+                    Client <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(2)">
+                    Requirement <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(3)">
+                    Assigned To <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(4)">
+                    Priority <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(5)">
+                    Status <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(6)">
+                    Issue <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(7)">
+                    Fixed On <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(8)">
+                    Days <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(9)">
+                    Created <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="taskTableBody">
+            <!-- Thymeleaf rows -->
+
+            <tr th:each="task : ${tasksList}" th:data-task-id="'TSK-' + ${task.taskId}">
+                <td>
+                    <span style="font-weight:600; color:#0b1a33;" th:text="'TSK-' + ${task.taskId}">TSK-1</span>
+                </td>
+                <td th:text="${task.clientName}">Client Name</td>
+                <td>
+                    <span class="text-truncate" th:text="${task.requirement} ?: '-'">Requirement</span>
+                </td>
+                <td th:text="${task.assignUserName} ?: 'Unassigned'">User</td>
+                <td>
+                    <span class="badge" th:classappend="'badge-priority-' + ${task.priority}"
+                          th:text="${task.priority} ?: '-'">P1</span>
+                </td>
+                <td>
+                    <span class="badge" th:classappend="'badge-status-' + ${task.status}"
+                          th:text="${task.status} ?: '-'">NEW</span>
+                </td>
+                <td th:text="${task.issue} ?: '-'">Bug</td>
+                <td>
+                    <span class="badge" th:classappend="'badge-fixedOn-' + ${task.fixedOn}"
+                          th:text="${task.fixedOn} ?: '-'">LOCAL</span>
+                </td>
+                <td th:text="${task.days} ?: '0'">0</td>
+                <td th:text="${#temporals.format(task.createAt, 'dd MMM yyyy')}">01 Jan 2024</td>
+                <td>
+                    <div class="action-group">
+                        <a th:href="@{/tasks/editTask/{id}(id=${task.taskId})}" class="action-btn action-btn-edit" title="Edit Task">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <div th:if="${allowDelete == true}">
+                            <span class="action-divider">|</span>
+                            <form th:action="@{/tasks/deleteTask/{id}(id=${task.taskId})}"
+                                  method="post"
+                                  style="display:inline"
+                                  onsubmit="return confirm('Are you sure you want to delete this task?');">
+                                <input type="hidden" name="_method" value="DELETE" />
+                                <button type="submit" class="action-btn action-btn-delete" title="Delete Task">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <!-- Empty state -->
+            <tr th:if="${#lists.isEmpty(tasksList)}" id="emptyState">
+                <td colspan="11" style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
+                    <i class="fas fa-tasks" style="font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.3;"></i>
+                    No tasks found. Click "Add Task" to create one.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Footer with Pagination -->
+    <div class="custom-footer-info">
+        <div class="pagination-info">
+            <span id="entryCount">
+                Showing <span id="startEntry">0</span> to <span id="endEntry">0</span> of <span id="totalEntries">0</span> entries
+            </span>
+        </div>
+        <div class="footer-actions" id="paginationControls">
+            <button class="footer-btn" id="prevPage" onclick="changePage(-1)">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span id="pageNumbers"></span>
+            <button class="footer-btn" id="nextPage" onclick="changePage(1)">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== PAGINATION VARIABLES =====
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let filteredRows = [];
+
+    // ===== INITIALIZE ON PAGE LOAD =====
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔄 Initializing pagination...');
+
+        // Get all rows from tbody
+        const tbody = document.getElementById('taskTableBody');
+        const rows = tbody.querySelectorAll('tr');
+
+        // Filter out empty state row
+        const dataRows = Array.from(rows).filter(row => row.id !== 'emptyState' && row.cells.length > 0);
+
+        console.log('📊 Found ' + dataRows.length + ' data rows');
+
+        if (dataRows.length === 0) {
+            // No data rows, show empty state
+            const emptyRow = document.getElementById('emptyState');
+            if (emptyRow) {
+                emptyRow.style.display = '';
+            }
+            document.getElementById('totalEntries').textContent = '0';
+            document.getElementById('startEntry').textContent = '0';
+            document.getElementById('endEntry').textContent = '0';
+            updatePaginationButtons();
+            return;
+        }
+
+        // Hide empty state initially
+        const emptyRow = document.getElementById('emptyState');
+        if (emptyRow) {
+            emptyRow.style.display = 'none';
+        }
+
+        // Initialize filteredRows with all data rows
+        filteredRows = dataRows;
+
+        // Render first page
+        renderPage();
+
+        console.log('✅ Pagination initialized successfully!');
+    });
+
+    // ===== FILTER FUNCTION =====
+    function filterTable() {
+        const taskIdFilter = document.getElementById('searchTaskId').value.toLowerCase();
+        const clientFilter = document.getElementById('searchClient').value.toLowerCase();
+        const requirementFilter = document.getElementById('searchRequirement').value.toLowerCase();
+        const assignedFilter = document.getElementById('searchAssigned').value.toLowerCase();
+        const priorityFilter = document.getElementById('searchPriority').value;
+        const statusFilter = document.getElementById('searchStatus').value;
+        const issueFilter = document.getElementById('searchIssue').value.toLowerCase();
+        const fixedOnFilter = document.getElementById('searchFixedOn').value;
+        const dateFrom = document.getElementById('searchDateFrom').value;
+        const dateTo = document.getElementById('searchDateTo').value;
+
+        // Get all rows from tbody
+        const tbody = document.getElementById('taskTableBody');
+        const rows = tbody.querySelectorAll('tr');
+
+        // Filter out empty state row
+        const dataRows = Array.from(rows).filter(row => row.id !== 'emptyState' && row.cells.length > 0);
+
+        if (dataRows.length === 0) {
+            filteredRows = [];
+            document.getElementById('totalEntries').textContent = '0';
+            document.getElementById('startEntry').textContent = '0';
+            document.getElementById('endEntry').textContent = '0';
+            renderPage();
+            return;
+        }
+
+        filteredRows = [];
+        let visibleCount = 0;
+
+        dataRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            let match = true;
+
+            if (taskIdFilter && !cells[0].textContent.toLowerCase().includes(taskIdFilter)) {
+                match = false;
+            }
+            else if (clientFilter && !cells[1].textContent.toLowerCase().includes(clientFilter)) {
+                match = false;
+            }
+            else if (requirementFilter && !cells[2].textContent.toLowerCase().includes(requirementFilter)) {
+                match = false;
+            }
+            else if (assignedFilter && !cells[3].textContent.toLowerCase().includes(assignedFilter)) {
+                match = false;
+            }
+            else if (priorityFilter) {
+                const priorityBadge = cells[4].querySelector('.badge');
+                if (!priorityBadge || !priorityBadge.textContent.includes(priorityFilter)) {
+                    match = false;
+                }
+            }
+            else if (statusFilter) {
+                const statusBadge = cells[5].querySelector('.badge');
+                if (!statusBadge || !statusBadge.textContent.toLowerCase().includes(statusFilter.toLowerCase())) {
+                    match = false;
+                }
+            }
+            else if (issueFilter && !cells[6].textContent.toLowerCase().includes(issueFilter)) {
+                match = false;
+            }
+            else if (fixedOnFilter) {
+                const fixedOnBadge = cells[7].querySelector('.badge');
+                if (!fixedOnBadge || !fixedOnBadge.textContent.includes(fixedOnFilter)) {
+                    match = false;
+                }
+            }
+            else if (dateFrom || dateTo) {
+                const dateStr = cells[9].textContent.trim();
+                if (dateStr) {
+                    const dateObj = new Date(dateStr);
+                    if (dateFrom) {
+                        const fromDate = new Date(dateFrom);
+                        if (dateObj < fromDate) {
+                            match = false;
+                        }
+                    }
+                    if (dateTo && match) {
+                        const toDate = new Date(dateTo);
+                        toDate.setHours(23, 59, 59, 999);
+                        if (dateObj > toDate) {
+                            match = false;
+                        }
+                    }
+                }
+            }
+
+            if (match) {
+                row.style.display = '';
+                filteredRows.push(row);
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Hide empty state if there are filtered rows
+        const emptyRow = document.getElementById('emptyState');
+        if (emptyRow) {
+            if (visibleCount === 0 && dataRows.length > 0) {
+                emptyRow.style.display = '';
+            } else {
+                emptyRow.style.display = 'none';
+            }
+        }
+
+        // Update total entries count
+        document.getElementById('totalEntries').textContent = visibleCount;
+
+        // Reset to first page and render
+        currentPage = 1;
+        renderPage();
+    }
+
+    // ===== RENDER PAGE =====
+    function renderPage() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, filteredRows.length);
+        const totalRows = filteredRows.length;
+
+        // Hide all rows first
+        filteredRows.forEach(row => row.style.display = 'none');
+
+        // Show only rows for current page
+        for (let i = start; i < end; i++) {
+            if (filteredRows[i]) {
+                filteredRows[i].style.display = '';
+            }
+        }
+
+        // Update entry count
+        document.getElementById('startEntry').textContent = totalRows > 0 ? start + 1 : 0;
+        document.getElementById('endEntry').textContent = end;
+        document.getElementById('totalEntries').textContent = totalRows;
+
+        // Update pagination buttons
+        updatePaginationButtons();
+    }
+
+    // ===== UPDATE PAGINATION BUTTONS =====
+    function updatePaginationButtons() {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        const prevBtn = document.getElementById('prevPage');
+        const nextBtn = document.getElementById('nextPage');
+        const pageNumbers = document.getElementById('pageNumbers');
+
+        // Update Previous/Next buttons
+        prevBtn.disabled = currentPage <= 1 || totalPages === 0;
+        nextBtn.disabled = currentPage >= totalPages || totalPages === 0;
+
+        // Generate page numbers
+        let html = '';
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage < maxVisiblePages - 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        if (totalPages === 0) {
+            html = `<span style="color: #9aafc7; font-size: 0.85rem;">No pages</span>`;
+        } else {
+            if (startPage > 1) {
+                html += `<button class="footer-btn" onclick="goToPage(1)">1</button>`;
+                if (startPage > 2) {
+                    html += `<span style="color: #9aafc7; padding: 0 4px;">...</span>`;
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="footer-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += `<span style="color: #9aafc7; padding: 0 4px;">...</span>`;
+                }
+                html += `<button class="footer-btn" onclick="goToPage(${totalPages})">${totalPages}</button>`;
+            }
+        }
+
+        pageNumbers.innerHTML = html;
+    }
+
+    // ===== CHANGE PAGE =====
+    function changePage(delta) {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        const newPage = currentPage + delta;
+        if (newPage >= 1 && newPage <= totalPages) {
+            currentPage = newPage;
+            renderPage();
+        }
+    }
+
+    // ===== GO TO SPECIFIC PAGE =====
+    function goToPage(page) {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            renderPage();
+        }
+    }
+
+    // ===== SORT FUNCTION =====
+    let sortDirection = {};
+
+    function sortTable(columnIndex) {
+        const tbody = document.getElementById('taskTableBody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        // Filter out empty state row
+        const dataRows = rows.filter(row => row.id !== 'emptyState' && row.cells.length > 0);
+
+        if (dataRows.length === 0) return;
+
+        sortDirection[columnIndex] = !sortDirection[columnIndex];
+        const ascending = sortDirection[columnIndex];
+
+        document.querySelectorAll('.sort-icon').forEach((icon, index) => {
+            icon.innerHTML = '<i class="fas fa-sort"></i>';
+            icon.classList.remove('active');
+        });
+        const currentIcon = document.querySelectorAll('.sort-icon')[columnIndex];
+        if (currentIcon) {
+            currentIcon.innerHTML = ascending ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>';
+            currentIcon.classList.add('active');
+        }
+
+        dataRows.sort((a, b) => {
+            let aVal, bVal;
+            const cellsA = a.querySelectorAll('td');
+            const cellsB = b.querySelectorAll('td');
+
+            switch(columnIndex) {
+                case 0:
+                    aVal = parseInt(cellsA[0].textContent.replace('TSK-', ''));
+                    bVal = parseInt(cellsB[0].textContent.replace('TSK-', ''));
+                    break;
+                case 1:
+                    aVal = cellsA[1].textContent.trim().toLowerCase();
+                    bVal = cellsB[1].textContent.trim().toLowerCase();
+                    break;
+                case 2:
+                    aVal = cellsA[2].textContent.trim().toLowerCase();
+                    bVal = cellsB[2].textContent.trim().toLowerCase();
+                    break;
+                case 3:
+                    aVal = cellsA[3].textContent.trim().toLowerCase();
+                    bVal = cellsB[3].textContent.trim().toLowerCase();
+                    break;
+                case 4:
+                    const aBadge = cellsA[4].querySelector('.badge');
+                    const bBadge = cellsB[4].querySelector('.badge');
+                    aVal = aBadge ? aBadge.textContent.trim() : '';
+                    bVal = bBadge ? bBadge.textContent.trim() : '';
+                    break;
+                case 5:
+                    const aStatus = cellsA[5].querySelector('.badge');
+                    const bStatus = cellsB[5].querySelector('.badge');
+                    aVal = aStatus ? aStatus.textContent.trim() : '';
+                    bVal = bStatus ? bStatus.textContent.trim() : '';
+                    break;
+                case 6:
+                    aVal = cellsA[6].textContent.trim().toLowerCase();
+                    bVal = cellsB[6].textContent.trim().toLowerCase();
+                    break;
+                case 7:
+                    const aFixed = cellsA[7].querySelector('.badge');
+                    const bFixed = cellsB[7].querySelector('.badge');
+                    aVal = aFixed ? aFixed.textContent.trim() : '';
+                    bVal = bFixed ? bFixed.textContent.trim() : '';
+                    break;
+                case 8:
+                    aVal = parseInt(cellsA[8].textContent.trim()) || 0;
+                    bVal = parseInt(cellsB[8].textContent.trim()) || 0;
+                    break;
+                case 9:
+                    aVal = new Date(cellsA[9].textContent.trim());
+                    bVal = new Date(cellsB[9].textContent.trim());
+                    break;
+                default:
+                    aVal = a.textContent.trim().toLowerCase();
+                    bVal = b.textContent.trim().toLowerCase();
+            }
+
+            if (aVal < bVal) return ascending ? -1 : 1;
+            if (aVal > bVal) return ascending ? 1 : -1;
+            return 0;
+        });
+
+        // Reorder rows
+        dataRows.forEach(row => tbody.appendChild(row));
+
+        // Rebuild filteredRows after sort
+        filteredRows = dataRows;
+        currentPage = 1;
+        renderPage();
+    }
+
+    function clearFilters() {
+        document.getElementById('searchTaskId').value = '';
+        document.getElementById('searchClient').value = '';
+        document.getElementById('searchRequirement').value = '';
+        document.getElementById('searchAssigned').value = '';
+        document.getElementById('searchPriority').value = '';
+        document.getElementById('searchStatus').value = '';
+        document.getElementById('searchIssue').value = '';
+        document.getElementById('searchFixedOn').value = '';
+        document.getElementById('searchDateFrom').value = '';
+        document.getElementById('searchDateTo').value = '';
+        filterTable();
+    }
+
+    document.querySelectorAll('.search-group input, .search-group select').forEach(element => {
+        element.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                filterTable();
+            }
+        });
+    });
+
+    let debounceTimer;
+    document.querySelectorAll('.search-group input, .search-group select').forEach(element => {
+        element.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(filterTable, 300);
+        });
+    });
+</script>
+
+</body>
+</html>

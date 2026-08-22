@@ -6,10 +6,12 @@ import com.company.usermanagement.entity.TaskEntity;
 import com.company.usermanagement.exception.ResourceNotFoundException;
 import com.company.usermanagement.mapper.TaskMapper;
 import com.company.usermanagement.repository.TaskRepository;
+import com.company.usermanagement.session.UserLoginSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,17 +21,24 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
     private final TaskMapper mapper;
+    private final UserLoginSession userLoginSession;
 
     @Override
     @Transactional
     public TaskDTO saveTask(TaskDTO taskDTO) {
+        Long currentUser= userLoginSession.getUserId();
+        taskDTO.setCreateBy(currentUser);
+        taskDTO.setUpdatedBy(currentUser);
+        taskDTO.setCreateAt(LocalDateTime.now());
+        taskDTO.setUpdateAt(LocalDateTime.now());
+        taskDTO.setIsActive(true);
         return mapper.toDTO(taskRepository.save(mapper.toEntity(taskDTO)));
     }
 
-    @Transactional
+    /*@Transactional
     public List<TaskEntity> saveAll(List<TaskEntity> tasks) {
         return taskRepository.saveAll(tasks);
-    }
+    }*/
     @Override
     public TaskDTO getTaskById(Long taskId) {
         return mapper.toDTO(taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId)));
@@ -37,7 +46,12 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<TaskDTO> getAllTasks() {
-        return mapper.toDTOList(taskRepository.findAll());
+        return mapper.toDTOList(taskRepository.getAllTask());
+    }
+
+    @Override
+    public List<TaskDTO> getMyAllTasks(List<Long> userIds) {
+        return mapper.toDTOList(taskRepository.getMyAllTask(userIds));
     }
 
     @Override
@@ -47,68 +61,65 @@ public class TaskServiceImpl implements TaskService {
         if(existingTask == null){
             new ResourceNotFoundException("Task not found with id: " + taskId);
         }
+        taskDTO.setCreateBy(existingTask.getCreatedBy());
+        taskDTO.setUpdatedBy(userLoginSession.getUserId());
+        taskDTO.setCreateAt(existingTask.getCreateAt());
+        taskDTO.setUpdateAt(LocalDateTime.now());
         mapper.updateTaskEntity(taskDTO, existingTask);
         return mapper.toDTO(taskRepository.save(existingTask));
     }
 
     @Override
+    @Transactional
     public void deleteTask(Long taskId) {
         TaskEntity existingTask = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
         if(existingTask == null){
             new ResourceNotFoundException("Task not found with id: " + taskId);
         }
-        taskRepository.delete(existingTask);
+        taskRepository.deleteTaskById(taskId);
     }
 
     @Override
-    public List<TaskDTO> getFilteredTasks(String assignedTo, String issueType, String priority, String status, String fixedOn) {
-        List<TaskEntity> tasks = taskRepository.findAll();
+    public List<TaskDTO> getFilteredTasks(String client, String assignedTo, String issueType, String priority, String status, String fixedOn, String dateFrom, String dateTo) {
+        Long assignedUserId = null;
+        if (!"all".equals(assignedTo) && assignedTo != null && !assignedTo.isEmpty()) {
+            try {
+                assignedUserId = Long.parseLong(assignedTo);
+            } catch (NumberFormatException e) {
+                // ignore - keep as null
+            }
+        }
 
-        // Apply filters
-        List<TaskEntity> filteredTasks = tasks.stream()
-                .filter(task -> {
-                    // Filter by assigned user
-                    if (!"all".equals(assignedTo) && assignedTo != null) {
-                        Long assignUserId = Long.parseLong(assignedTo);
-                        if (task.getAssignedUser() == null ||
-                                !task.getAssignedUser().getUserId().equals(assignUserId)) {
-                            return false;
-                        }
-                    }
+        // Parse date strings to LocalDateTime
+        LocalDateTime fromDate = null;
+        LocalDateTime toDate = null;
 
-                    // Filter by issue type
-                    if (!"all".equals(issueType) && issueType != null) {
-                        if (task.getIssue() == null || !task.getIssue().equals(issueType)) {
-                            return false;
-                        }
-                    }
+        if (dateFrom != null && !dateFrom.isEmpty()) {
+            try {
+                fromDate = LocalDateTime.parse(dateFrom + "T00:00:00");
+            } catch (Exception e) {
+                // ignore
+            }
+        }
 
-                    // Filter by priority
-                    if (!"all".equals(priority) && priority != null) {
-                        if (task.getPriority() == null || !task.getPriority().equals(priority)) {
-                            return false;
-                        }
-                    }
+        if (dateTo != null && !dateTo.isEmpty()) {
+            try {
+                toDate = LocalDateTime.parse(dateTo + "T23:59:59");
+            } catch (Exception e) {
+                // ignore
+            }
+        }
 
-                    // Filter by status
-                    if (!"all".equals(status) && status != null){
-                        if (task.getStatus() == null || !task.getStatus().equals(status)){
-                            return false;
-                        }
-                    }
+        // Use repository query
+        List<TaskEntity> tasks = taskRepository.findTasksWithFilters(
+                assignedUserId, issueType, priority, status, fixedOn, client, fromDate, toDate
+        );
 
-                    // Filter by fixed On
-                    if (!"all".equals(fixedOn) && fixedOn != null){
-                        if (task.getFixedOn() == null || !task.getFixedOn().equals(fixedOn)){
-                            return false;
-                        }
-                    }
+        return mapper.toDTOList(tasks);
+    }
 
-                    return true;
-                })
-                .collect(Collectors.toList());
-
-        // Convert to DTOs
-        return mapper.toDTOList(filteredTasks);
+    @Override
+    public List<String> getDistinctClientNames() {
+        return taskRepository.findDistinctClientNames();
     }
 }

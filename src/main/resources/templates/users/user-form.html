@@ -403,22 +403,17 @@
 
       <!-- Role -->
       <div class="field-group field-full">
-        <label>
-          <i class="fas fa-user-tag"></i>
-          Role <span class="required">*</span>
-        </label>
-        <select th:field="*{role}" required>
-          <option value="">-- Select Role --</option>
-          <option value="ADMIN">Admin</option>
-          <option value="SR_DEVELOPER">Sr. Developer</option>
-          <option value="DEVELOPER">Developer</option>
-        </select>
-
-        <span class="error-message" th:if="${#fields.hasErrors('role')}">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span th:errors="*{role}">Error message</span>
-                </span>
+        <label><i class="fas fa-user-tag"></i>Role <span class="required">*</span></label>
+          <select id="f_role" th:field="*{role}">
+              <option th:each="role : ${roleList}"
+                      th:value="${role.key}"
+                      th:text="${role.value}">
+              </option>
+          </select>
+        <span class="error-message" th:if="${#fields.hasErrors('role')}"><i class="fas fa-exclamation-circle"></i><span th:errors="*{role}">Error message</span></span>
       </div>
+
+
     </div>
 
     <!-- Actions -->

@@ -353,6 +353,83 @@
                 padding: 0.2rem 0.4rem;
             }
         }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.2rem;
+            background: #f7faff;
+            color: #2a436e;
+            border: 1px solid #ccd7e9;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-back:hover {
+            background: #edf4ff;
+            border-color: #b0c4e2;
+            transform: translateY(-2px);
+        }
+
+        .btn-back i {
+            font-size: 0.8rem;
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.5rem;
+            background: linear-gradient(135deg, #4a7fe0, #3a6bc0);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 16px rgba(74, 127, 224, 0.25);
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(74, 127, 224, 0.35);
+        }
+
+        .btn-add i {
+            font-size: 0.875rem;
+        }
+
+        /* For mobile responsive */
+        @media (max-width: 768px) {
+            .header-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .btn-back,
+            .btn-add {
+                flex: 1;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -365,10 +442,16 @@
       User Management
       <small th:text="'· ' + ${#lists.size(users)} + ' users'">· 0 users</small>
     </h4>
-    <a th:href="@{/users/add}" class="btn-add">
-      <i class="fas fa-plus-circle"></i>
-      Add User
-    </a>
+    <div class="header-actions">
+      <a th:href="@{/dashboard}" class="btn-back">
+        <i class="fas fa-arrow-left"></i>
+        Back to Dashboard
+      </a>
+      <a th:href="@{/users/add}" class="btn-add">
+        <i class="fas fa-plus-circle"></i>
+        Add User
+      </a>
+    </div>
   </div>
 
   <!-- Table -->
@@ -445,7 +528,7 @@
 
             <!-- Change Password -->
 
-            <a th:href="@{/users/change-password/{id}(id=${user.userId}, mode='admin')}"
+            <a th:href="@{/dashboard/change-password/{id}(id=${user.userId}, mode='admin')}"
                class="action-btn action-btn-password"
                title="Change Password for Admin">
               <i class="fas fa-key"></i> Password

@@ -645,7 +645,7 @@
             <div class="kpi-card" style="--accent: #f59e0b;">
                 <div class="kpi-label">In Progress</div>
                 <div class="kpi-number"
-                     th:text="${#lists.size(tasksList.?[status == 'WORKING' or status == 'Working' or status == 'working'])}">0</div>
+                     th:text="${#lists.size(tasksList.?[status == 'WORKING' or status == 'Working' or status == 'working' or status == 'ASSIGNED' or status == 'Assigned' or status == 'assigned'])}">0</div>
                 <div class="kpi-sub">Active tasks</div>
             </div>
             <div class="kpi-card" style="--accent: #A63A2E;">
@@ -747,18 +747,13 @@
         <div class="tabbar" id="tabbar">
             <!-- All Tasks Tab -->
             <button class="tab active" onclick="filterTasks('all')">
-                All Tasks
-                <span class="n" th:text="${#lists.size(tasksList)}">0</span>
+                All Tasks <span class="n" th:text="${#lists.size(tasksList)}">0</span>
             </button>
 
-            <!-- Status Tabs - Dynamically generated from statusList -->
-            <button th:each="statusItem : ${statusList}"
-                    class="tab"
-                    th:data-status="${statusItem.key}"
-                    onclick="filterTasks(this.getAttribute('data-status'))">
-                <span th:text="${statusItem.value}"></span>
-                <!--<span class="n" th:text="${#lists.size(tasksList.?[status == statusItem.key])}">0</span>-->
-            </button>
+            <!-- Status Tabs -->
+            <div style="display:none;">
+                <div th:each="task : ${tasksList}" th:text="${task.status}"></div>
+            </div>
         </div>
 
         <div class="found-line" id="foundLine">
@@ -778,7 +773,7 @@
 
             <!-- Task Cards -->
             <div th:if="${not #lists.isEmpty(tasksList)}" class="tickets">
-                <div th:each="task : ${tasksList}" class="ticket" >
+                <div th:each="task : ${tasksList}" class="ticket">
                     <!-- Stub Section -->
                     <div class="stub">
                         <div>

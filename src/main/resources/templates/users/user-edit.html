@@ -388,23 +388,38 @@
       </div>
 
       <!-- Role -->
-      <div class="field-group field-full">
-        <label>
-          <i class="fas fa-user-tag"></i>
-          Role <span class="required">*</span>
-        </label>
-        <select th:field="*{role}" required>
-          <option value="">-- Select Role --</option>
-          <option value="ADMIN">Admin</option>
-          <option value="SR_DEVELOPER">Sr. Developer</option>
-          <option value="DEVELOPER">Developer</option>
-        </select>
 
-        <span class="error-message" th:if="${#fields.hasErrors('role')}">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <span th:errors="*{role}">Error message</span>
-                </span>
+      <div class="field-group field-full" th:if="${user.userId != 1}">
+        <label><i class="fas fa-user-tag"></i>Role <span class="required">*</span></label>
+        <select id="f_role" th:field="*{role}" required>
+          <option th:each="role : ${roleList}"
+                  th:value="${role.key}"
+                  th:text="${role.value}"
+                  th:selected="${role.key == user.role}">
+          </option>
+        </select>
+        <span class="error-message" th:if="${#fields.hasErrors('role')}"><i class="fas fa-exclamation-circle"></i><span th:errors="*{role}">Error message</span></span>
       </div>
+
+      <!-- Message displayed when userId == 1 -->
+      <div class="field-group field-full"
+           th:if="${user.userId == 1}">
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 1rem 1.2rem; display: flex; align-items: flex-start; gap: 0.8rem;">
+          <i class="fas fa-shield-alt" style="color: #3b82f6; font-size: 1.2rem; margin-top: 0.1rem;"></i>
+          <div>
+            <div style="font-weight: 600; color: #1e3a8a; font-size: 0.9rem;">Administrator Account</div>
+            <div style="font-size: 0.85rem; color: #3b82f6; margin-top: 0.2rem;">
+              Role is fixed for the primary administrator and cannot be modified.
+            </div>
+            <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.3rem;">
+              <i class="fas fa-info-circle"></i>
+              Current role: <strong th:text="${user.role}">ADMIN</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
 
     <!-- Actions -->

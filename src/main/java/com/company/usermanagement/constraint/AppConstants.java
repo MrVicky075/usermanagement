@@ -8,6 +8,12 @@ import java.util.Map;
 @NoArgsConstructor
 public final class AppConstants {
 
+    public static final String SESSION_USER ="userLoginSession";
+    public static final String ROLE_ADMIN ="ADMIN";
+    public static final String ROLE_SR_DEVELOPER = "SR_DEVELOPER";
+    public static final String ROLE_DEVELOPER ="DEVELOPER";
+    public static final String ROLE_SUPPORT ="SUPPORT";
+
     // Fixed On
     public static Map<String, String> getFixedOnList() {
         Map<String, String> map = new LinkedHashMap<>();
@@ -54,5 +60,12 @@ public final class AppConstants {
         return map;
     }
 
+    public static Map<String, String> getUserRoles() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("DEVELOPER", "Developer");
+        map.put("SR_DEVELOPER", "Sr. Developer");
+        map.put("SUPPORT", "Support Team");
+        return map;
+    }
 
 }

@@ -63,7 +63,13 @@ public class TaskEntity {
     @Column(name = "update_at")
     private LocalDateTime updateAt;
 
-    @Column(name = "is_active", columnDefinition = "VARCHAR(20) DEFAULT '-'")
-    private String isActive = "ACTIVE";
+    @Column(name = "created_by", nullable = false, updatable = false)
+    private Long createdBy;
+
+    @Column(name = "updated_by")
+    private Long updatedBy;
+
+    @Column(name = "isActive", nullable = false)
+    private Boolean isActive;
 
 }

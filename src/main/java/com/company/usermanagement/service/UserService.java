@@ -14,6 +14,7 @@ public interface UserService {
     void deleteUser(Long userId);
     UserResponseDTO getUserById(Long userId);
     List<UserResponseDTO> getAllUsers();
+
     void changeActiveStatus(Long userId);
     void changePassword(Long userId, ChangePasswordDTO request);
     UserEntity getEntityByEmail(String email);

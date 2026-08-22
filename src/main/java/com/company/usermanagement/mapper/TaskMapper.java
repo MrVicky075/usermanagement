@@ -35,7 +35,8 @@ public class TaskMapper {
         dto.setIsActive(entity.getIsActive());
         dto.setCreateAt(entity.getCreateAt());
         dto.setUpdateAt(entity.getUpdateAt());
-
+        dto.setCreateBy(entity.getCreatedBy());
+        dto.setUpdatedBy(entity.getUpdatedBy());
         if (entity.getAssignedUser() != null) {
             dto.setAssignUserId(entity.getAssignedUser().getUserId());
             dto.setAssignUserName(entity.getAssignedUser().getUserName());
@@ -64,10 +65,8 @@ public class TaskMapper {
         entity.setIsActive(dto.getIsActive());
         entity.setCreateAt(dto.getCreateAt());
         entity.setUpdateAt(dto.getUpdateAt());
-        System.out.println("id : " +dto.getAssignUserId());
-        System.out.println("data : "+ repository.findById(1L));
-        System.out.println("data : "+ repository.findById(2L));
-        System.out.println("data : "+ repository.findById(dto.getAssignUserId()));
+        entity.setCreatedBy(dto.getCreateBy());
+        entity.setUpdatedBy(dto.getUpdatedBy());
         if (dto.getAssignUserId() != null) {
             UserEntity user = repository.findById(dto.getAssignUserId()).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + dto.getAssignUserId()));
             entity.setAssignedUser(user);
