@@ -64,6 +64,11 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
+    public UserEntity findById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    @Override
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAllActiveUsers()
                 .stream()
@@ -98,5 +103,9 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserEntity getEntityByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(()-> new ResourceNotFoundException("User Not found"));
+    }
+
+    public UserEntity findByUserName(String username) {
+        return userRepository.findByUserName(username);
     }
 }

@@ -13,8 +13,10 @@ public interface UserService {
     UserResponseDTO updateUser(Long userId, UserResponseDTO request);
     void deleteUser(Long userId);
     UserResponseDTO getUserById(Long userId);
+    UserEntity findById(Long userId);
     List<UserResponseDTO> getAllUsers();
 
+    public UserEntity findByUserName(String username);
     void changeActiveStatus(Long userId);
     void changePassword(Long userId, ChangePasswordDTO request);
     UserEntity getEntityByEmail(String email);

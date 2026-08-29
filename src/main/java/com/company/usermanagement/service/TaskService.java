@@ -8,7 +8,8 @@ import java.util.List;
 public interface TaskService {
 
         TaskDTO saveTask(TaskDTO taskDTO);
-        //public List<TaskEntity> saveAll(List<TaskEntity> tasks);
+
+        public List<TaskEntity> saveAll(List<TaskEntity> tasks);
 
         TaskDTO getTaskById(Long taskId);
 

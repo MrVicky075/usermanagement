@@ -25,7 +25,7 @@ public class TaskEntity {
     @JoinColumn(name = "assign_user_id")
     private UserEntity assignedUser;
 
-    @Column(name = "priority", columnDefinition = "VARCHAR(20) DEFAULT '-'")
+    @Column(name = "priority", length = 20)
     private String priority = "-";
 
     @Column(name = "client_name", length = 255)
@@ -46,7 +46,7 @@ public class TaskEntity {
     @Column(name = "task_details", length = 5000)
     private String taskDetails;
 
-    @Column(name = "status", columnDefinition = "VARCHAR(20) DEFAULT '-'")
+    @Column(name = "status", length = 20)
     private String status = "-";
 
     @Column(name = "fixedOn")

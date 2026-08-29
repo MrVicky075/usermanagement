@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .userDetailsService(customUserDetailsService)
                 .authorizeHttpRequests(auth ->auth
                         .requestMatchers("/login","/css/**","/js/**","/images/**","/error").permitAll()
-                        .requestMatchers("/users/**","/tasks/deleteTask/**").hasAnyRole("ADMIN","SR_DEVELOPER","SUPPORT")
+                        .requestMatchers("/users/**","/tasks/deleteTask/**", "/excel/**").hasAnyRole("ADMIN","SR_DEVELOPER","SUPPORT")
                         //.requestMatchers("/dashboard").hasAnyRole("ADMIN","SR_DEVELOPER","DEVELOPER")
                         .requestMatchers("/dashboard","/tasks").authenticated()
                         .anyRequest().authenticated()

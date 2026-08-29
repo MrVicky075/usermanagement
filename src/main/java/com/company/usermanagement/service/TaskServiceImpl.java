@@ -35,10 +35,10 @@ public class TaskServiceImpl implements TaskService {
         return mapper.toDTO(taskRepository.save(mapper.toEntity(taskDTO)));
     }
 
-    /*@Transactional
+    @Transactional
     public List<TaskEntity> saveAll(List<TaskEntity> tasks) {
         return taskRepository.saveAll(tasks);
-    }*/
+    }
     @Override
     public TaskDTO getTaskById(Long taskId) {
         return mapper.toDTO(taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId)));

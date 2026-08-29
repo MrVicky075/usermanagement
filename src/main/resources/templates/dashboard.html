@@ -96,7 +96,11 @@
   .sidebar-foot .role{ font-size:11px; color:#7C86A6; }
 
   /* ---------- MAIN ---------- */
-  main{ padding:5px 34px 60px; max-width:1124px; }
+  main{
+      padding:5px 24px 60px;
+      max-width:100% !important;
+      width:100%;
+  }
   @media (max-width: 900px){ main{ padding:20px; } }
 
   .page-head{
@@ -127,7 +131,10 @@
 
   /* ---------- KPI CARDS ---------- */
   .kpi-grid{
-    display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+      gap:16px;
+      margin-bottom:22px;
   }
   @media (max-width:900px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
   @media (max-width:520px){ .kpi-grid{ grid-template-columns:1fr; } }
