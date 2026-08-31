@@ -41,9 +41,10 @@ public final class AppConstants {
         Map<String,String> map = new LinkedHashMap<>();
         map.put("-", "-");
         map.put("Bug", "Bug");
-        map.put("Change Request", "Change Request");
-        map.put("Production Task","Production Task");
+        map.put("ISSUE","ISSUE");
+        map.put("Requirement","Requirement");
         map.put("Email", "Email");
+        map.put("Change Request", "Change Request (CR)");
         map.put("Production Issue", "Production Issue");
         map.put("Other", "Other");
         return map;

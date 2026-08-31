@@ -96,22 +96,19 @@
 
         /* ----- table wrapper ----- */
         .table-responsive {
-            overflow-x: auto;
-            border-radius: 16px;
-            border: 1px solid #e9edf4;
-            background: #ffffff;
-            max-height: 520px;
-            overflow-y: auto;
-            overflow-x: auto;
+          overflow: visible;
+          border-radius: 16px;
+          border: 1px solid #e9edf4;
+          background: #ffffff;
         }
 
         /* ----- table styling ----- */
         .table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.875rem;
-            min-width: 1100px;
-            table-layout: auto;
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 0.875rem;
+          min-width: 1100px;
+          table-layout: auto;
         }
 
         /* header */
@@ -469,8 +466,8 @@
       </tr>
       </thead>
       <tbody>
-      <tr th:each="user : ${users}">
-        <td th:text="${user.userId}">1</td>
+      <tr th:each="user, stat : ${users}">
+        <td th:text="${stat.count}">1</td>
         <td th:text="${user.userName}">John Doe</td>
         <td th:text="${user.email}">john@example.com</td>
         <td th:text="${user.mobileNo}">+1234567890</td>

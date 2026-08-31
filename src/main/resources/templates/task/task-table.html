@@ -21,20 +21,20 @@
         body {
             background: #f4f7fc;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block;
             min-height: 100vh;
-            padding: 2rem 1rem;
+            padding: 0;
+            margin: 0;
         }
 
         .card {
             background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 10px rgba(0, 0, 0, 0.02);
-            padding: 1.8rem;
-            max-width: 1550px;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 1.5rem 2rem;
+            max-width: none;
             width: 100%;
+            min-height: 100vh;
             transition: all 0.2s;
         }
 
@@ -104,6 +104,9 @@
             background: #f8faff;
             border-radius: 12px;
             border: 1px solid #e9edf4;
+            overflow: visible;
+            position: relative;
+            z-index: 10;
         }
 
         .search-group {
@@ -159,6 +162,213 @@
         .search-group.date-range input {
             font-size: 0.65rem;
             padding: 0.25rem 0.4rem;
+        }
+
+        .search-group.ms-filter-group {
+            position: relative;
+            max-width: 160px;
+            min-width: 120px;
+            z-index: 20;
+        }
+
+        .ms-filter-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.3rem;
+            padding: 0.3rem 0.5rem;
+            border: 1px solid #dae1ed;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            width: 100%;
+            height: 28px;
+            color: #1a2c4a;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .ms-filter-trigger:hover,
+        .ms-filter-trigger.open {
+            border-color: #4a7fe0;
+            box-shadow: 0 0 0 3px rgba(74, 127, 224, 0.08);
+        }
+
+        .ms-filter-trigger .trigger-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #9aafc7;
+            flex: 1;
+        }
+
+        .ms-filter-trigger.has-filter .trigger-label {
+            color: #1a2c4a;
+            font-weight: 500;
+        }
+
+        .ms-filter-trigger .trigger-icon {
+            font-size: 0.55rem;
+            color: #5e6f8d;
+            flex-shrink: 0;
+        }
+
+        .ms-filter-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 260px;
+            background: #ffffff;
+            border: 1px solid #c5d0e0;
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(15, 35, 70, 0.15);
+            z-index: 100;
+            padding: 0.5rem;
+        }
+
+        .ms-filter-panel.open {
+            display: block;
+        }
+
+        .ms-filter-header {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1a2c4a;
+            padding: 0.2rem 0.3rem 0.45rem;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            border-bottom: 1px solid #e9edf4;
+            margin-bottom: 0.45rem;
+        }
+
+        .ms-filter-header i {
+            font-size: 0.55rem;
+            color: #5e6f8d;
+        }
+
+        .ms-filter-search {
+            position: relative;
+            margin-bottom: 0.45rem;
+        }
+
+        .ms-filter-search input {
+            width: 100%;
+            height: 28px;
+            padding: 0.3rem 1.8rem 0.3rem 0.5rem;
+            border: 1px solid #dae1ed;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            color: #1a2c4a;
+        }
+
+        .ms-filter-search input:focus {
+            border-color: #4a7fe0;
+        }
+
+        .ms-filter-search i {
+            position: absolute;
+            right: 0.55rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.65rem;
+            color: #9aafc7;
+            pointer-events: none;
+        }
+
+        .ms-filter-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e9edf4;
+            border-radius: 4px;
+            padding: 0.25rem 0;
+            background: #fff;
+        }
+
+        .ms-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.28rem 0.55rem;
+            font-size: 0.72rem;
+            color: #1a2c4a;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .ms-filter-item:hover {
+            background: #f0f5ff;
+        }
+
+        .ms-filter-item.hidden {
+            display: none;
+        }
+
+        .ms-filter-item input[type="checkbox"] {
+            width: 13px;
+            height: 13px;
+            accent-color: #4a7fe0;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .ms-filter-item span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ms-filter-item.select-all {
+            font-weight: 600;
+            border-bottom: 1px solid #eef2f8;
+            margin-bottom: 0.15rem;
+            padding-bottom: 0.4rem;
+        }
+
+        .ms-filter-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+            padding-top: 0.4rem;
+            border-top: 1px solid #e9edf4;
+        }
+
+        .ms-filter-btn {
+            padding: 0.25rem 0.85rem;
+            border-radius: 14px;
+            font-size: 0.7rem;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            height: 26px;
+        }
+
+        .ms-filter-btn-ok {
+            background: #fff;
+            color: #1a2c4a;
+            border: 1.5px solid #4a7fe0;
+        }
+
+        .ms-filter-btn-ok:hover {
+            background: #edf4ff;
+        }
+
+        .ms-filter-btn-cancel {
+            background: #fff;
+            color: #5e6f8d;
+            border: 1px solid #c5d0e0;
+        }
+
+        .ms-filter-btn-cancel:hover {
+            background: #f5f7fa;
         }
 
         .search-actions {
@@ -514,6 +724,13 @@
                 max-width: 100%;
                 min-width: 100%;
             }
+            .search-group.ms-filter-group {
+                max-width: 100%;
+                min-width: 100%;
+            }
+            .ms-filter-panel {
+                width: 100%;
+            }
             .search-actions {
                 margin-left: 0;
                 width: 100%;
@@ -574,17 +791,51 @@
             <label><i class="fas fa-hashtag"></i></label>
             <input type="text" id="searchTaskId" placeholder="TSK-1" onkeyup="filterTable()" />
         </div>
-        <div class="search-group">
+        <div class="search-group ms-filter-group" data-filter-key="client">
             <label><i class="fas fa-building"></i></label>
-            <input type="text" id="searchClient" placeholder="Client" onkeyup="filterTable()" />
+            <button type="button" class="ms-filter-trigger" id="clientFilterTrigger" onclick="toggleMsFilter(event, 'client')">
+                <span class="trigger-label" id="clientFilterLabel">Client</span>
+                <i class="fas fa-caret-down trigger-icon"></i>
+            </button>
+            <div class="ms-filter-panel" id="clientFilterPanel" onclick="event.stopPropagation()">
+                <div class="ms-filter-header">
+                    Text Filters <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="ms-filter-search">
+                    <input type="text" id="clientFilterSearch" placeholder="Search" oninput="searchMsOptions('client')" />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="ms-filter-list" id="clientFilterList"></div>
+                <div class="ms-filter-actions">
+                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('client')">OK</button>
+                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('client')">Cancel</button>
+                </div>
+            </div>
         </div>
         <div class="search-group">
             <label><i class="fas fa-file-alt"></i></label>
             <input type="text" id="searchRequirement" placeholder="Requirement" onkeyup="filterTable()" />
         </div>
-        <div class="search-group">
+        <div class="search-group ms-filter-group" data-filter-key="assigned">
             <label><i class="fas fa-user"></i></label>
-            <input type="text" id="searchAssigned" placeholder="Assigned To" onkeyup="filterTable()" />
+            <button type="button" class="ms-filter-trigger" id="assignedFilterTrigger" onclick="toggleMsFilter(event, 'assigned')">
+                <span class="trigger-label" id="assignedFilterLabel">Assigned To</span>
+                <i class="fas fa-caret-down trigger-icon"></i>
+            </button>
+            <div class="ms-filter-panel" id="assignedFilterPanel" onclick="event.stopPropagation()">
+                <div class="ms-filter-header">
+                    Text Filters <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="ms-filter-search">
+                    <input type="text" id="assignedFilterSearch" placeholder="Search" oninput="searchMsOptions('assigned')" />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="ms-filter-list" id="assignedFilterList"></div>
+                <div class="ms-filter-actions">
+                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('assigned')">OK</button>
+                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('assigned')">Cancel</button>
+                </div>
+            </div>
         </div>
         <div class="search-group">
             <label><i class="fas fa-flag"></i></label>
@@ -609,9 +860,26 @@
                 <option value="-">-</option>
             </select>
         </div>
-        <div class="search-group">
+        <div class="search-group ms-filter-group" data-filter-key="issue">
             <label><i class="fas fa-tag"></i></label>
-            <input type="text" id="searchIssue" placeholder="Issue" onkeyup="filterTable()" />
+            <button type="button" class="ms-filter-trigger" id="issueFilterTrigger" onclick="toggleMsFilter(event, 'issue')">
+                <span class="trigger-label" id="issueFilterLabel">Issue</span>
+                <i class="fas fa-caret-down trigger-icon"></i>
+            </button>
+            <div class="ms-filter-panel" id="issueFilterPanel" onclick="event.stopPropagation()">
+                <div class="ms-filter-header">
+                    Text Filters <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="ms-filter-search">
+                    <input type="text" id="issueFilterSearch" placeholder="Search" oninput="searchMsOptions('issue')" />
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="ms-filter-list" id="issueFilterList"></div>
+                <div class="ms-filter-actions">
+                    <button type="button" class="ms-filter-btn ms-filter-btn-ok" onclick="applyMsFilter('issue')">OK</button>
+                    <button type="button" class="ms-filter-btn ms-filter-btn-cancel" onclick="cancelMsFilter('issue')">Cancel</button>
+                </div>
+            </div>
         </div>
         <div class="search-group">
             <label><i class="fas fa-server"></i></label>
@@ -759,24 +1027,186 @@
 <script>
     // ===== PAGINATION VARIABLES =====
     let currentPage = 1;
-    const rowsPerPage = 10;
+    const rowsPerPage = 15;
     let filteredRows = [];
+
+    // ===== MULTI-SELECT FILTERS (Client / Assigned / Issue) =====
+    const msFilters = {
+        client:   { selected: null, col: 1, placeholder: 'Client' },
+        assigned: { selected: null, col: 3, placeholder: 'Assigned To' },
+        issue:    { selected: null, col: 6, placeholder: 'Issue' }
+    };
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function getAllDataRows() {
+        const tbody = document.getElementById('taskTableBody');
+        const rows = tbody.querySelectorAll('tr');
+        return Array.from(rows).filter(row => row.id !== 'emptyState' && row.cells.length > 0);
+    }
+
+    function getUniqueColumnValues(colIndex) {
+        const values = new Set();
+        getAllDataRows().forEach(row => {
+            const name = row.cells[colIndex].textContent.trim();
+            if (name) values.add(name);
+        });
+        return Array.from(values).sort((a, b) => a.localeCompare(b));
+    }
+
+    function buildMsFilterList(key) {
+        const cfg = msFilters[key];
+        const list = document.getElementById(key + 'FilterList');
+        const values = getUniqueColumnValues(cfg.col);
+        const checkedSet = cfg.selected === null ? null : new Set(cfg.selected);
+        const allChecked = checkedSet === null || checkedSet.size === values.length;
+
+        let html = `
+            <label class="ms-filter-item select-all">
+                <input type="checkbox" id="${key}SelectAll" ${allChecked ? 'checked' : ''} onchange="toggleSelectAllMs('${key}', this)" />
+                <span>(Select All)</span>
+            </label>
+        `;
+
+        values.forEach(value => {
+            const checked = checkedSet === null || checkedSet.has(value);
+            const safe = escapeHtml(value);
+            html += `
+                <label class="ms-filter-item" data-value="${safe}">
+                    <input type="checkbox" class="ms-option" value="${safe}" ${checked ? 'checked' : ''} onchange="onMsOptionChange('${key}')" />
+                    <span>${safe}</span>
+                </label>
+            `;
+        });
+
+        list.innerHTML = html;
+    }
+
+    function closeAllMsFilters(exceptKey) {
+        Object.keys(msFilters).forEach(key => {
+            if (key === exceptKey) return;
+            document.getElementById(key + 'FilterPanel').classList.remove('open');
+            document.getElementById(key + 'FilterTrigger').classList.remove('open');
+        });
+    }
+
+    function toggleMsFilter(event, key) {
+        event.stopPropagation();
+        const panel = document.getElementById(key + 'FilterPanel');
+        const trigger = document.getElementById(key + 'FilterTrigger');
+        const isOpen = panel.classList.contains('open');
+
+        closeAllMsFilters(null);
+
+        if (isOpen) return;
+
+        buildMsFilterList(key);
+        document.getElementById(key + 'FilterSearch').value = '';
+        panel.classList.add('open');
+        trigger.classList.add('open');
+        document.getElementById(key + 'FilterSearch').focus();
+    }
+
+    function closeMsFilter(key) {
+        document.getElementById(key + 'FilterPanel').classList.remove('open');
+        document.getElementById(key + 'FilterTrigger').classList.remove('open');
+    }
+
+    function searchMsOptions(key) {
+        const query = document.getElementById(key + 'FilterSearch').value.toLowerCase().trim();
+        document.querySelectorAll('#' + key + 'FilterList .ms-filter-item:not(.select-all)').forEach(item => {
+            const text = item.querySelector('span').textContent.toLowerCase();
+            item.classList.toggle('hidden', query && !text.includes(query));
+        });
+    }
+
+    function toggleSelectAllMs(key, checkbox) {
+        const visible = document.querySelectorAll('#' + key + 'FilterList .ms-filter-item:not(.select-all):not(.hidden) .ms-option');
+        visible.forEach(cb => { cb.checked = checkbox.checked; });
+        syncMsSelectAllState(key);
+    }
+
+    function onMsOptionChange(key) {
+        syncMsSelectAllState(key);
+    }
+
+    function syncMsSelectAllState(key) {
+        const all = document.querySelectorAll('#' + key + 'FilterList .ms-option');
+        const checked = document.querySelectorAll('#' + key + 'FilterList .ms-option:checked');
+        const selectAll = document.getElementById(key + 'SelectAll');
+        if (selectAll) {
+            selectAll.checked = all.length > 0 && checked.length === all.length;
+            selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+        }
+    }
+
+    function getDraftSelectedMs(key) {
+        const checked = Array.from(document.querySelectorAll('#' + key + 'FilterList .ms-option:checked'))
+            .map(cb => cb.value);
+        const all = Array.from(document.querySelectorAll('#' + key + 'FilterList .ms-option'))
+            .map(cb => cb.value);
+        if (checked.length === 0 || checked.length === all.length) {
+            return null;
+        }
+        return checked;
+    }
+
+    function applyMsFilter(key) {
+        msFilters[key].selected = getDraftSelectedMs(key);
+        updateMsFilterLabel(key);
+        closeMsFilter(key);
+        filterTable();
+    }
+
+    function cancelMsFilter(key) {
+        closeMsFilter(key);
+    }
+
+    function updateMsFilterLabel(key) {
+        const cfg = msFilters[key];
+        const label = document.getElementById(key + 'FilterLabel');
+        const trigger = document.getElementById(key + 'FilterTrigger');
+        if (!cfg.selected || cfg.selected.length === 0) {
+            label.textContent = cfg.placeholder;
+            trigger.classList.remove('has-filter');
+        } else if (cfg.selected.length === 1) {
+            label.textContent = cfg.selected[0];
+            trigger.classList.add('has-filter');
+        } else {
+            label.textContent = cfg.selected.length + ' selected';
+            trigger.classList.add('has-filter');
+        }
+    }
+
+    function resetAllMsFilters() {
+        Object.keys(msFilters).forEach(key => {
+            msFilters[key].selected = null;
+            updateMsFilterLabel(key);
+            closeMsFilter(key);
+        });
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.ms-filter-group')) {
+            closeAllMsFilters(null);
+        }
+    });
 
     // ===== INITIALIZE ON PAGE LOAD =====
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🔄 Initializing pagination...');
 
-        // Get all rows from tbody
-        const tbody = document.getElementById('taskTableBody');
-        const rows = tbody.querySelectorAll('tr');
-
-        // Filter out empty state row
-        const dataRows = Array.from(rows).filter(row => row.id !== 'emptyState' && row.cells.length > 0);
+        const dataRows = getAllDataRows();
 
         console.log('📊 Found ' + dataRows.length + ' data rows');
 
         if (dataRows.length === 0) {
-            // No data rows, show empty state
             const emptyRow = document.getElementById('emptyState');
             if (emptyRow) {
                 emptyRow.style.display = '';
@@ -788,16 +1218,12 @@
             return;
         }
 
-        // Hide empty state initially
         const emptyRow = document.getElementById('emptyState');
         if (emptyRow) {
             emptyRow.style.display = 'none';
         }
 
-        // Initialize filteredRows with all data rows
         filteredRows = dataRows;
-
-        // Render first page
         renderPage();
 
         console.log('✅ Pagination initialized successfully!');
@@ -806,22 +1232,14 @@
     // ===== FILTER FUNCTION =====
     function filterTable() {
         const taskIdFilter = document.getElementById('searchTaskId').value.toLowerCase();
-        const clientFilter = document.getElementById('searchClient').value.toLowerCase();
         const requirementFilter = document.getElementById('searchRequirement').value.toLowerCase();
-        const assignedFilter = document.getElementById('searchAssigned').value.toLowerCase();
         const priorityFilter = document.getElementById('searchPriority').value;
         const statusFilter = document.getElementById('searchStatus').value;
-        const issueFilter = document.getElementById('searchIssue').value.toLowerCase();
         const fixedOnFilter = document.getElementById('searchFixedOn').value;
         const dateFrom = document.getElementById('searchDateFrom').value;
         const dateTo = document.getElementById('searchDateTo').value;
 
-        // Get all rows from tbody
-        const tbody = document.getElementById('taskTableBody');
-        const rows = tbody.querySelectorAll('tr');
-
-        // Filter out empty state row
-        const dataRows = Array.from(rows).filter(row => row.id !== 'emptyState' && row.cells.length > 0);
+        const dataRows = getAllDataRows();
 
         if (dataRows.length === 0) {
             filteredRows = [];
@@ -834,6 +1252,9 @@
 
         filteredRows = [];
         let visibleCount = 0;
+        const clientSet = msFilters.client.selected ? new Set(msFilters.client.selected) : null;
+        const assignedSet = msFilters.assigned.selected ? new Set(msFilters.assigned.selected) : null;
+        const issueSet = msFilters.issue.selected ? new Set(msFilters.issue.selected) : null;
 
         dataRows.forEach(row => {
             const cells = row.querySelectorAll('td');
@@ -842,37 +1263,37 @@
             if (taskIdFilter && !cells[0].textContent.toLowerCase().includes(taskIdFilter)) {
                 match = false;
             }
-            else if (clientFilter && !cells[1].textContent.toLowerCase().includes(clientFilter)) {
+            if (match && clientSet && !clientSet.has(cells[1].textContent.trim())) {
                 match = false;
             }
-            else if (requirementFilter && !cells[2].textContent.toLowerCase().includes(requirementFilter)) {
+            if (match && requirementFilter && !cells[2].textContent.toLowerCase().includes(requirementFilter)) {
                 match = false;
             }
-            else if (assignedFilter && !cells[3].textContent.toLowerCase().includes(assignedFilter)) {
+            if (match && assignedSet && !assignedSet.has(cells[3].textContent.trim())) {
                 match = false;
             }
-            else if (priorityFilter) {
+            if (match && priorityFilter) {
                 const priorityBadge = cells[4].querySelector('.badge');
                 if (!priorityBadge || !priorityBadge.textContent.includes(priorityFilter)) {
                     match = false;
                 }
             }
-            else if (statusFilter) {
+            if (match && statusFilter) {
                 const statusBadge = cells[5].querySelector('.badge');
                 if (!statusBadge || !statusBadge.textContent.toLowerCase().includes(statusFilter.toLowerCase())) {
                     match = false;
                 }
             }
-            else if (issueFilter && !cells[6].textContent.toLowerCase().includes(issueFilter)) {
+            if (match && issueSet && !issueSet.has(cells[6].textContent.trim())) {
                 match = false;
             }
-            else if (fixedOnFilter) {
+            if (match && fixedOnFilter) {
                 const fixedOnBadge = cells[7].querySelector('.badge');
                 if (!fixedOnBadge || !fixedOnBadge.textContent.includes(fixedOnFilter)) {
                     match = false;
                 }
             }
-            else if (dateFrom || dateTo) {
+            if (match && (dateFrom || dateTo)) {
                 const dateStr = cells[9].textContent.trim();
                 if (dateStr) {
                     const dateObj = new Date(dateStr);
@@ -901,7 +1322,6 @@
             }
         });
 
-        // Hide empty state if there are filtered rows
         const emptyRow = document.getElementById('emptyState');
         if (emptyRow) {
             if (visibleCount === 0 && dataRows.length > 0) {
@@ -911,10 +1331,7 @@
             }
         }
 
-        // Update total entries count
         document.getElementById('totalEntries').textContent = visibleCount;
-
-        // Reset to first page and render
         currentPage = 1;
         renderPage();
     }
@@ -925,22 +1342,18 @@
         const end = Math.min(start + rowsPerPage, filteredRows.length);
         const totalRows = filteredRows.length;
 
-        // Hide all rows first
         filteredRows.forEach(row => row.style.display = 'none');
 
-        // Show only rows for current page
         for (let i = start; i < end; i++) {
             if (filteredRows[i]) {
                 filteredRows[i].style.display = '';
             }
         }
 
-        // Update entry count
         document.getElementById('startEntry').textContent = totalRows > 0 ? start + 1 : 0;
         document.getElementById('endEntry').textContent = end;
         document.getElementById('totalEntries').textContent = totalRows;
 
-        // Update pagination buttons
         updatePaginationButtons();
     }
 
@@ -951,11 +1364,9 @@
         const nextBtn = document.getElementById('nextPage');
         const pageNumbers = document.getElementById('pageNumbers');
 
-        // Update Previous/Next buttons
         prevBtn.disabled = currentPage <= 1 || totalPages === 0;
         nextBtn.disabled = currentPage >= totalPages || totalPages === 0;
 
-        // Generate page numbers
         let html = '';
         const maxVisiblePages = 5;
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
@@ -1014,17 +1425,14 @@
 
     function sortTable(columnIndex) {
         const tbody = document.getElementById('taskTableBody');
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-
-        // Filter out empty state row
-        const dataRows = rows.filter(row => row.id !== 'emptyState' && row.cells.length > 0);
+        const dataRows = getAllDataRows();
 
         if (dataRows.length === 0) return;
 
         sortDirection[columnIndex] = !sortDirection[columnIndex];
         const ascending = sortDirection[columnIndex];
 
-        document.querySelectorAll('.sort-icon').forEach((icon, index) => {
+        document.querySelectorAll('.sort-icon').forEach((icon) => {
             icon.innerHTML = '<i class="fas fa-sort"></i>';
             icon.classList.remove('active');
         });
@@ -1096,30 +1504,24 @@
             return 0;
         });
 
-        // Reorder rows
         dataRows.forEach(row => tbody.appendChild(row));
-
-        // Rebuild filteredRows after sort
-        filteredRows = dataRows;
-        currentPage = 1;
-        renderPage();
+        filterTable();
     }
 
     function clearFilters() {
         document.getElementById('searchTaskId').value = '';
-        document.getElementById('searchClient').value = '';
         document.getElementById('searchRequirement').value = '';
-        document.getElementById('searchAssigned').value = '';
         document.getElementById('searchPriority').value = '';
         document.getElementById('searchStatus').value = '';
-        document.getElementById('searchIssue').value = '';
         document.getElementById('searchFixedOn').value = '';
         document.getElementById('searchDateFrom').value = '';
         document.getElementById('searchDateTo').value = '';
+        resetAllMsFilters();
         filterTable();
     }
 
     document.querySelectorAll('.search-group input, .search-group select').forEach(element => {
+        if (element.id && element.id.endsWith('FilterSearch')) return;
         element.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -1130,6 +1532,7 @@
 
     let debounceTimer;
     document.querySelectorAll('.search-group input, .search-group select').forEach(element => {
+        if (element.id && element.id.endsWith('FilterSearch')) return;
         element.addEventListener('input', function() {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(filterTable, 300);

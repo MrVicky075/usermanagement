@@ -244,11 +244,13 @@
     font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; letter-spacing:.02em;
     display:flex; align-items:center; gap:5px; white-space:nowrap;
   }
-  .chip.status-new{ background:var(--slate-soft); color:var(--slate); }
+  .chip.status-new,
+  .chip.status-new-task{ background:var(--slate-soft); color:var(--slate); }
   .chip.status-assigned{ background:var(--gold-soft); color:var(--gold); }
   .chip.status-working{ background:#FDEBD8; color:#B15E1E; }
   .chip.status-complete{ background:var(--teal-soft); color:var(--teal); }
   .chip.status-hold{ background:var(--stamp-red-soft); color:var(--stamp-red); }
+  .chip.status-dash{ background:#EEF1F5; color:#6B7280; }
   .chip.status-complete::before{ content:"●"; font-size:8px; }
   .chip.issue{ background:var(--slate-soft); color:var(--slate); }
   .chip.days{ background:transparent; border:1px solid var(--line); color:var(--text-soft); }
@@ -498,12 +500,14 @@
         flex: none;
     }
 
-    .status-dot-new { background: #4B5A72; }
+    .status-dot-new,
+    .status-dot-new-task { background: #4B5A72; }
     .status-dot-assigned { background: #9C6B12; }
     .status-dot-working { background: #B15E1E; }
     .status-dot-complete { background: #2B6E5B; }
     .status-dot-hold { background: #A63A2E; }
     .status-dot-closed { background: #6b7280; }
+    .status-dot-dash { background: #9CA3AF; }
 
     /* Priority chip styles */
     .chip.priority-p1 {
@@ -638,24 +642,43 @@
 
         <!-- KPI SUMMARY CARDS -->
         <div class="kpi-grid" id="kpiGrid">
-            <div class="kpi-card" style="--accent: #4B5A72;">
+            <div class="kpi-card" style="--accent: #4B5A72; cursor:pointer;" onclick="filterTasks('all')">
                 <div class="kpi-label">Total Tasks</div>
                 <div class="kpi-number" th:text="${#lists.size(tasksList)}">0</div>
                 <div class="kpi-sub">All tasks</div>
             </div>
-            <div class="kpi-card" style="--accent: #2B6E5B;">
+            <div class="kpi-card" style="--accent: #f59e0b; cursor:pointer;" onclick="filterTasks('-')">
+                <div class="kpi-label">-</div>
+                <div class="kpi-number"
+                     th:text="${#lists.size(tasksList.?[status == '-' ])}">0</div>
+                <div class="kpi-sub">Active tasks</div>
+            </div>
+            <div class="kpi-card" style="--accent: #f59e0b; cursor:pointer;" onclick="filterTasks('New Task')">
+                <div class="kpi-label">New Task</div>
+                <div class="kpi-number"
+                     th:text="${#lists.size(tasksList.?[status == 'New Task' or status == 'new task' or status == 'NEW TASK'])}">0</div>
+                <div class="kpi-sub">Active tasks</div>
+            </div>
+            <div class="kpi-card" style="--accent: #f59e0b; cursor:pointer;" onclick="filterTasks('Assigned')">
+                <div class="kpi-label">Assigned</div>
+                <div class="kpi-number"
+                     th:text="${#lists.size(tasksList.?[status == 'ASSIGNED' or status == 'Assigned' or status == 'assigned'])}">0</div>
+                <div class="kpi-sub">Active tasks</div>
+            </div>
+
+            <div class="kpi-card" style="--accent: #2B6E5B; cursor:pointer;" onclick="filterTasks('Complete')">
                 <div class="kpi-label">Completed</div>
                 <div class="kpi-number"
                      th:text="${#lists.size(tasksList.?[status == 'COMPLETE' or status == 'Complete' or status == 'complete' or status == 'COMPLETED' or status == 'Completed'])}">0</div>
                 <div class="kpi-sub">Closed tasks</div>
             </div>
-            <div class="kpi-card" style="--accent: #f59e0b;">
+            <div class="kpi-card" style="--accent: #f59e0b; cursor:pointer;" onclick="filterTasks('Working')">
                 <div class="kpi-label">In Progress</div>
                 <div class="kpi-number"
                      th:text="${#lists.size(tasksList.?[status == 'WORKING' or status == 'Working' or status == 'working'])}">0</div>
                 <div class="kpi-sub">Active tasks</div>
             </div>
-            <div class="kpi-card" style="--accent: #A63A2E;">
+            <div class="kpi-card" style="--accent: #A63A2E; cursor:pointer;" onclick="filterTasks('Hold')">
                 <div class="kpi-label">On Hold</div>
                 <div class="kpi-number"
                      th:text="${#lists.size(tasksList.?[status == 'HOLD' or status == 'Hold' or status == 'hold'])}">0</div>
@@ -753,18 +776,19 @@
         <!-- TABS -->
         <div class="tabbar" id="tabbar">
             <!-- All Tasks Tab -->
-            <button class="tab active" onclick="filterTasks('all')">
+            <button type="button" class="tab active" onclick="filterTasks('all')">
                 All Tasks
                 <span class="n" th:text="${#lists.size(tasksList)}">0</span>
             </button>
 
             <!-- Status Tabs - Dynamically generated from statusList -->
-            <button th:each="statusItem : ${statusList}"
+            <button type="button"
+                    th:each="statusItem : ${statusList}"
                     class="tab"
-                    th:data-status="${statusItem.key}"
+                    th:attr="data-status=${statusItem.key}"
                     onclick="filterTasks(this.getAttribute('data-status'))">
                 <span th:text="${statusItem.value}"></span>
-                <!--<span class="n" th:text="${#lists.size(tasksList.?[status == statusItem.key])}">0</span>-->
+                <span class="n tab-count" th:attr="data-count-for=${statusItem.key}">0</span>
             </button>
         </div>
 
@@ -785,7 +809,9 @@
 
             <!-- Task Cards -->
             <div th:if="${not #lists.isEmpty(tasksList)}" class="tickets">
-                <div th:each="task : ${tasksList}" class="ticket" >
+                <div th:each="task : ${tasksList}"
+                     class="ticket"
+                     th:data-task-status="${task.status}">
                     <!-- Stub Section -->
                     <div class="stub">
                         <div>
@@ -802,7 +828,8 @@
                         <div class="ticket-top">
                             <div>
                                 <div class="client">
-                                    <span class="status-dot" th:classappend="'status-dot-' + ${task.status?.toLowerCase()}"></span>
+                                    <span class="status-dot"
+                                          th:classappend="${task.status == '-' ? 'status-dot-dash' : 'status-dot-' + #strings.replace(#strings.toLowerCase(task.status ?: ''), ' ', '-')}"></span>
                                     <span th:text="${task.clientName}">Client Name</span>
                                 </div>
                                 <div class="created" style="font-size:11px; color:var(--text-faint); margin-top:2px;">
@@ -813,7 +840,9 @@
                             </div>
                             <div class="chips">
                                 <!-- Status Chip -->
-                                <span class="chip" th:classappend="'status-' + ${task.status?.toLowerCase()}"
+                                <span class="chip task-status-chip"
+                                      th:attr="data-status=${task.status}"
+                                      th:classappend="${task.status == '-' ? 'status-dash' : 'status-' + #strings.replace(#strings.toLowerCase(task.status ?: ''), ' ', '-')}"
                                       th:text="${task.status}">New</span>
                                 <!-- Priority Chip -->
                                 <span class="chip priority" th:classappend="'priority-' + ${task.priority?.toLowerCase()}"
@@ -887,54 +916,81 @@
 </div>
 <!-- Minimal JavaScript for interactivity -->
 <script>
+function normalizeStatus(value) {
+    return (value == null ? '' : String(value)).trim().toLowerCase();
+}
+
+function getTicketStatus(ticket) {
+    // 1) Explicit data attribute on card
+    const fromCard = ticket.getAttribute('data-task-status');
+    if (fromCard != null && String(fromCard).trim() !== '') {
+        return String(fromCard).trim();
+    }
+    // 2) Status chip data-status
+    const chip = ticket.querySelector('.task-status-chip');
+    if (chip) {
+        const fromChipAttr = chip.getAttribute('data-status');
+        if (fromChipAttr != null && String(fromChipAttr).trim() !== '') {
+            return String(fromChipAttr).trim();
+        }
+        // 3) Visible chip text (always rendered by Thymeleaf)
+        const text = (chip.textContent || '').trim();
+        if (text) return text;
+    }
+    return '';
+}
+
+function statusesMatch(taskStatus, selectedStatus) {
+    const a = normalizeStatus(taskStatus);
+    const b = normalizeStatus(selectedStatus);
+    if (a === b) return true;
+    // tolerate spaced / underscored variants: "New Task" vs "new_task" vs "new-task"
+    const compact = (s) => s.replace(/[_\s-]+/g, ' ').trim();
+    return compact(a) === compact(b);
+}
+
 function filterTasks(status) {
-    // Get all tab buttons
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => tab.classList.remove('active'));
 
-    // Find the clicked tab and make it active
     const clickedTab = Array.from(tabs).find(tab => {
         if (status === 'all') {
             return tab.textContent.trim().startsWith('All Tasks');
         }
-        return tab.getAttribute('data-status') === status;
+        return normalizeStatus(tab.getAttribute('data-status')) === normalizeStatus(status);
     });
     if (clickedTab) clickedTab.classList.add('active');
 
-    // Get all task cards
     const tickets = document.querySelectorAll('.ticket');
     const foundLine = document.getElementById('foundLine');
     let visibleCount = 0;
 
     if (status === 'all') {
-        // Show all tasks
-        tickets.forEach(ticket => ticket.style.display = 'flex');
+        tickets.forEach(ticket => { ticket.style.display = 'flex'; });
         visibleCount = tickets.length;
     } else {
-        // Filter tasks by status - matching the backend status values
         tickets.forEach(ticket => {
-            // Get status from the status chip
-            const statusChip = ticket.querySelector('.chip[class*="status-"]');
-            if (statusChip) {
-                // Get the actual status class (status-new, status-assigned, etc.)
-                const classList = statusChip.className;
-                const statusMatch = classList.match(/status-([^\s]+)/);
-                if (statusMatch) {
-                    const taskStatus = statusMatch[1].toUpperCase();
-                    // Compare with the selected status
-                    const isMatch = taskStatus === status.toUpperCase();
-                    ticket.style.display = isMatch ? 'flex' : 'none';
-                    if (isMatch) visibleCount++;
-                }
-            }
+            const isMatch = statusesMatch(getTicketStatus(ticket), status);
+            ticket.style.display = isMatch ? 'flex' : 'none';
+            if (isMatch) visibleCount++;
         });
     }
 
-    // Update found line
     if (foundLine) {
         foundLine.innerHTML = '<b>' + visibleCount + '</b> task(s) found';
     }
 }
+
+function refreshTabCounts() {
+    const tickets = Array.from(document.querySelectorAll('.ticket'));
+    document.querySelectorAll('.tab-count[data-count-for]').forEach(badge => {
+        const key = badge.getAttribute('data-count-for');
+        const count = tickets.filter(t => statusesMatch(getTicketStatus(t), key)).length;
+        badge.textContent = count;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', refreshTabCounts);
 
 function deleteTask(taskId) {
     if (confirm('Are you sure you want to delete this task?')) {
