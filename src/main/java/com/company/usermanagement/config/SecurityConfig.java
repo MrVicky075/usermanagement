@@ -1,7 +1,10 @@
 package com.company.usermanagement.config;
 
-import com.company.usermanagement.security.CustomUserDetails;
+import com.company.usermanagement.security.AuditLogoutHandler;
 import com.company.usermanagement.security.CustomUserDetailsService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,10 +17,21 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
+    private final AuditLogoutHandler auditLogoutHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder(12);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        // Register JavaTimeModule for Java 8 date/time support
+        mapper.registerModule(new JavaTimeModule());
+        // Disable writing dates as timestamps
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
     }
 
     @Bean
@@ -27,7 +41,8 @@ public class SecurityConfig {
                 .userDetailsService(customUserDetailsService)
                 .authorizeHttpRequests(auth ->auth
                         .requestMatchers("/login","/css/**","/js/**","/images/**","/error").permitAll()
-                        .requestMatchers("/users/**","/tasks/deleteTask/**", "/excel/**").hasAnyRole("ADMIN","SR_DEVELOPER","SUPPORT")
+                        .requestMatchers("/users/**","/tasks/deleteTask/**", "/excel/**", "/audit/**")
+                                .hasAnyRole("ADMIN","SR_DEVELOPER","SUPPORT")
                         //.requestMatchers("/dashboard").hasAnyRole("ADMIN","SR_DEVELOPER","DEVELOPER")
                         .requestMatchers("/dashboard","/tasks").authenticated()
                         .anyRequest().authenticated()
@@ -44,6 +59,7 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true")
+                        .addLogoutHandler(auditLogoutHandler)
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .clearAuthentication(true)

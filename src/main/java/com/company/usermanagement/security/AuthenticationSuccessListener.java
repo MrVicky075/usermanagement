@@ -1,6 +1,7 @@
 package com.company.usermanagement.security;
 
 import com.company.usermanagement.entity.UserEntity;
+import com.company.usermanagement.service.AuditService;
 import com.company.usermanagement.service.UserService;
 import com.company.usermanagement.session.UserLoginSession;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class AuthenticationSuccessListener {
     private final UserService userService;
     private final UserLoginSession userLoginSession;
+    private final AuditService auditService;
 
     @EventListener
     public void authenticationSuccess(AuthenticationSuccessEvent event){
@@ -26,5 +28,6 @@ public class AuthenticationSuccessListener {
         userLoginSession.setRole(user.getRole());
         userLoginSession.setIsActive(user.getIsActive());
 
+        auditService.logLogin(user.getUserId(), user.getUserName());
     }
 }

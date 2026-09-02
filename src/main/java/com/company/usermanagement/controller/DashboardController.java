@@ -80,7 +80,7 @@ public class DashboardController {
             return "dashboard/change-password";
         }
         userService.changePassword(id,request);
-        return "redirect:/dashboard";
+        return "redirect:/login";
     }
     @GetMapping("/excelUploadPage")
     public String excelUploadPage(Model model){

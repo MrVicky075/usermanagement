@@ -1,6 +1,9 @@
 package com.company.usermanagement.service;
 
 
+import com.company.usermanagement.audit.AuditAction;
+import com.company.usermanagement.audit.AuditEntityType;
+import com.company.usermanagement.audit.AuditSnapshotUtil;
 import com.company.usermanagement.dto.TaskDTO;
 import com.company.usermanagement.entity.TaskEntity;
 import com.company.usermanagement.exception.ResourceNotFoundException;
@@ -13,7 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final TaskMapper mapper;
     private final UserLoginSession userLoginSession;
+    private final AuditService auditService;
 
     @Override
     @Transactional
@@ -32,13 +37,33 @@ public class TaskServiceImpl implements TaskService {
         taskDTO.setCreateAt(LocalDateTime.now());
         taskDTO.setUpdateAt(LocalDateTime.now());
         taskDTO.setIsActive(true);
-        return mapper.toDTO(taskRepository.save(mapper.toEntity(taskDTO)));
+        TaskEntity saved = taskRepository.save(mapper.toEntity(taskDTO));
+
+        auditService.log(
+                AuditAction.CREATE,
+                AuditEntityType.TASK,
+                saved.getTaskId(),
+                "Created task #" + saved.getTaskId(),
+                null,
+                AuditSnapshotUtil.taskSnapshot(saved)
+        );
+        return mapper.toDTO(saved);
     }
 
     @Transactional
     public List<TaskEntity> saveAll(List<TaskEntity> tasks) {
-        return taskRepository.saveAll(tasks);
+        List<TaskEntity> saved = taskRepository.saveAll(tasks);
+        auditService.log(
+                AuditAction.BULK_CREATE,
+                AuditEntityType.TASK,
+                null,
+                "Bulk imported " + saved.size() + " tasks",
+                null,
+                AuditSnapshotUtil.singleValueMap("count", saved.size())
+        );
+        return saved;
     }
+
     @Override
     public TaskDTO getTaskById(Long taskId) {
         return mapper.toDTO(taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId)));
@@ -58,25 +83,38 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public TaskDTO updateTask(Long taskId, TaskDTO taskDTO) {
         TaskEntity existingTask = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
-        if(existingTask == null){
-            new ResourceNotFoundException("Task not found with id: " + taskId);
-        }
+        Map<String, Object> before = AuditSnapshotUtil.taskSnapshot(existingTask);
+
         taskDTO.setCreateBy(existingTask.getCreatedBy());
         taskDTO.setUpdatedBy(userLoginSession.getUserId());
         taskDTO.setCreateAt(existingTask.getCreateAt());
         taskDTO.setUpdateAt(LocalDateTime.now());
+        if (taskDTO.getIsActive() == null) {
+            taskDTO.setIsActive(existingTask.getIsActive());
+        }
         mapper.updateTaskEntity(taskDTO, existingTask);
-        return mapper.toDTO(taskRepository.save(existingTask));
+        TaskEntity saved = taskRepository.save(existingTask);
+        Map<String, Object> after = AuditSnapshotUtil.taskSnapshot(saved);
+
+        logTaskUpdateAudit(taskId, before, after);
+        return mapper.toDTO(saved);
     }
 
     @Override
     @Transactional
     public void deleteTask(Long taskId) {
         TaskEntity existingTask = taskRepository.findById(taskId).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
-        if(existingTask == null){
-            new ResourceNotFoundException("Task not found with id: " + taskId);
-        }
+        Map<String, Object> before = AuditSnapshotUtil.taskSnapshot(existingTask);
         taskRepository.deleteTaskById(taskId);
+
+        auditService.log(
+                AuditAction.DELETE,
+                AuditEntityType.TASK,
+                taskId,
+                "Deleted task #" + taskId,
+                before,
+                AuditSnapshotUtil.singleValueMap("isActive", false)
+        );
     }
 
     @Override
@@ -90,7 +128,6 @@ public class TaskServiceImpl implements TaskService {
             }
         }
 
-        // Parse date strings to LocalDateTime
         LocalDateTime fromDate = null;
         LocalDateTime toDate = null;
 
@@ -110,7 +147,6 @@ public class TaskServiceImpl implements TaskService {
             }
         }
 
-        // Use repository query
         List<TaskEntity> tasks = taskRepository.findTasksWithFilters(
                 assignedUserId, issueType, priority, status, fixedOn, client, fromDate, toDate
         );
@@ -121,5 +157,42 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<String> getDistinctClientNames() {
         return taskRepository.findDistinctClientNames();
+    }
+
+    private void logTaskUpdateAudit(Long taskId, Map<String, Object> before, Map<String, Object> after) {
+        Map<String, Object> changes = AuditSnapshotUtil.diff(before, after);
+        if (changes.isEmpty()) {
+            return;
+        }
+
+        String actor = userLoginSession.getUserName() != null ? userLoginSession.getUserName() : "System";
+        Object oldStatus = before.get("status");
+        Object newStatus = after.get("status");
+        boolean statusChanged = !Objects.equals(oldStatus, newStatus);
+
+        if (statusChanged && changes.size() == 1) {
+            auditService.log(
+                    AuditAction.STATUS_CHANGE,
+                    AuditEntityType.TASK,
+                    taskId,
+                    actor + " changed task #" + taskId + " status from " + oldStatus + " to " + newStatus,
+                    AuditSnapshotUtil.singleValueMap("status", oldStatus),
+                    AuditSnapshotUtil.singleValueMap("status", newStatus)
+            );
+            return;
+        }
+
+        String description = statusChanged
+                ? actor + " updated task #" + taskId + " (status: " + oldStatus + " -> " + newStatus + ")"
+                : actor + " updated task #" + taskId;
+
+        auditService.log(
+                AuditAction.UPDATE,
+                AuditEntityType.TASK,
+                taskId,
+                description,
+                before,
+                after
+        );
     }
 }

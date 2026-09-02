@@ -88,7 +88,9 @@ public class TaskMapper {
         entity.setStatus(dto.getStatus());
         entity.setFixedOn(dto.getFixedOn());
         entity.setRemarks(dto.getRemarks());
-        entity.setIsActive(dto.getIsActive());
+        if (dto.getIsActive() != null) {
+            entity.setIsActive(dto.getIsActive());
+        }
         if (dto.getAssignUserId() != null) {
             UserEntity user = repository.findById(dto.getAssignUserId()).orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + dto.getAssignUserId()));
             entity.setAssignedUser(user);

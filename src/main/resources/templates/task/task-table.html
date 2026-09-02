@@ -427,16 +427,15 @@
             border-radius: 16px;
             border: 1px solid #e9edf4;
             background: #ffffff;
-            max-height: 520px;
-            overflow-y: auto;
-            overflow-x: auto;
+            overflow-y: visible; /* Changed from 'auto' to 'visible' */
+            /* REMOVE: max-height: 520px; */
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.875rem;
-            min-width: 1350px;
+            min-width: 1450px;
             table-layout: auto;
         }
 
@@ -670,6 +669,10 @@
             overflow: hidden;
             text-overflow: ellipsis;
             display: inline-block;
+            cursor: help; /* Adds a help cursor to indicate more info */
+        }
+        .text-truncate[title] {
+            border-bottom: 1px dashed #ccc; /* Adds a subtle dotted underline */
         }
 
         .pagination-info {
@@ -924,25 +927,28 @@
                     Requirement <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(3)">
-                    Assigned To <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Remarks <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(4)">
-                    Priority <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Assigned To <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(5)">
-                    Status <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Priority <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(6)">
-                    Issue <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Status <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(7)">
-                    Fixed On <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Issue <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(8)">
-                    Days <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Fixed On <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th onclick="sortTable(9)">
-                    Created <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                    Days <span class="sort-icon"><i class="fas fa-sort"></i></span>
+                </th>
+                <th onclick="sortTable(10)">
+                    Updated <span class="sort-icon"><i class="fas fa-sort"></i></span>
                 </th>
                 <th>Actions</th>
             </tr>
@@ -956,7 +962,10 @@
                 </td>
                 <td th:text="${task.clientName}">Client Name</td>
                 <td>
-                    <span class="text-truncate" th:text="${task.requirement} ?: '-'">Requirement</span>
+                    <span class="text-truncate" th:text="${task.requirement} ?: '-'" th:title="${task.requirement} ?: '-'">Requirement</span>
+                </td>
+                <td>
+                    <span class="text-truncate" th:text="${task.remarks} ?: '-'" th:title="${task.remarks} ?: '-'">Remarks</span>
                 </td>
                 <td th:text="${task.assignUserName} ?: 'Unassigned'">User</td>
                 <td>
@@ -973,7 +982,7 @@
                           th:text="${task.fixedOn} ?: '-'">LOCAL</span>
                 </td>
                 <td th:text="${task.days} ?: '0'">0</td>
-                <td th:text="${#temporals.format(task.createAt, 'dd MMM yyyy')}">01 Jan 2024</td>
+                <td th:text="${task.updateAt != null ? #temporals.format(task.updateAt, 'dd MMM yyyy HH:mm') : '-'}">01 Jan 2024</td>
                 <td>
                     <div class="action-group">
                         <a th:href="@{/tasks/editTask/{id}(id=${task.taskId})}" class="action-btn action-btn-edit" title="Edit Task">
@@ -996,7 +1005,7 @@
             </tr>
             <!-- Empty state -->
             <tr th:if="${#lists.isEmpty(tasksList)}" id="emptyState">
-                <td colspan="11" style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
+                <td colspan="12" style="text-align: center; padding: 3rem 1rem; color: #6b7280;">
                     <i class="fas fa-tasks" style="font-size: 2rem; display: block; margin-bottom: 0.5rem; opacity: 0.3;"></i>
                     No tasks found. Click "Add Task" to create one.
                 </td>
@@ -1033,9 +1042,19 @@
     // ===== MULTI-SELECT FILTERS (Client / Assigned / Issue) =====
     const msFilters = {
         client:   { selected: null, col: 1, placeholder: 'Client' },
-        assigned: { selected: null, col: 3, placeholder: 'Assigned To' },
-        issue:    { selected: null, col: 6, placeholder: 'Issue' }
+        assigned: { selected: null, col: 4, placeholder: 'Assigned To' },
+        issue:    { selected: null, col: 7, placeholder: 'Issue' }
     };
+
+    // Add title attribute to all truncated text elements for tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.text-truncate').forEach(el => {
+            const text = el.textContent.trim();
+            if (text && text !== '-') {
+                el.setAttribute('title', text);
+            }
+        });
+    });
 
     function escapeHtml(str) {
         return String(str)
@@ -1269,32 +1288,32 @@
             if (match && requirementFilter && !cells[2].textContent.toLowerCase().includes(requirementFilter)) {
                 match = false;
             }
-            if (match && assignedSet && !assignedSet.has(cells[3].textContent.trim())) {
+            if (match && assignedSet && !assignedSet.has(cells[4].textContent.trim())) {
                 match = false;
             }
             if (match && priorityFilter) {
-                const priorityBadge = cells[4].querySelector('.badge');
+                const priorityBadge = cells[5].querySelector('.badge');
                 if (!priorityBadge || !priorityBadge.textContent.includes(priorityFilter)) {
                     match = false;
                 }
             }
             if (match && statusFilter) {
-                const statusBadge = cells[5].querySelector('.badge');
+                const statusBadge = cells[6].querySelector('.badge');
                 if (!statusBadge || !statusBadge.textContent.toLowerCase().includes(statusFilter.toLowerCase())) {
                     match = false;
                 }
             }
-            if (match && issueSet && !issueSet.has(cells[6].textContent.trim())) {
+            if (match && issueSet && !issueSet.has(cells[7].textContent.trim())) {
                 match = false;
             }
             if (match && fixedOnFilter) {
-                const fixedOnBadge = cells[7].querySelector('.badge');
+                const fixedOnBadge = cells[8].querySelector('.badge');
                 if (!fixedOnBadge || !fixedOnBadge.textContent.includes(fixedOnFilter)) {
                     match = false;
                 }
             }
             if (match && (dateFrom || dateTo)) {
-                const dateStr = cells[9].textContent.trim();
+                const dateStr = cells[10].textContent.trim();
                 if (dateStr) {
                     const dateObj = new Date(dateStr);
                     if (dateFrom) {
@@ -1465,34 +1484,38 @@
                     bVal = cellsB[3].textContent.trim().toLowerCase();
                     break;
                 case 4:
-                    const aBadge = cellsA[4].querySelector('.badge');
-                    const bBadge = cellsB[4].querySelector('.badge');
+                    aVal = cellsA[4].textContent.trim().toLowerCase();
+                    bVal = cellsB[4].textContent.trim().toLowerCase();
+                    break;
+                case 5:
+                    const aBadge = cellsA[5].querySelector('.badge');
+                    const bBadge = cellsB[5].querySelector('.badge');
                     aVal = aBadge ? aBadge.textContent.trim() : '';
                     bVal = bBadge ? bBadge.textContent.trim() : '';
                     break;
-                case 5:
-                    const aStatus = cellsA[5].querySelector('.badge');
-                    const bStatus = cellsB[5].querySelector('.badge');
+                case 6:
+                    const aStatus = cellsA[6].querySelector('.badge');
+                    const bStatus = cellsB[6].querySelector('.badge');
                     aVal = aStatus ? aStatus.textContent.trim() : '';
                     bVal = bStatus ? bStatus.textContent.trim() : '';
                     break;
-                case 6:
-                    aVal = cellsA[6].textContent.trim().toLowerCase();
-                    bVal = cellsB[6].textContent.trim().toLowerCase();
-                    break;
                 case 7:
-                    const aFixed = cellsA[7].querySelector('.badge');
-                    const bFixed = cellsB[7].querySelector('.badge');
+                    aVal = cellsA[7].textContent.trim().toLowerCase();
+                    bVal = cellsB[7].textContent.trim().toLowerCase();
+                    break;
+                case 8:
+                    const aFixed = cellsA[8].querySelector('.badge');
+                    const bFixed = cellsB[8].querySelector('.badge');
                     aVal = aFixed ? aFixed.textContent.trim() : '';
                     bVal = bFixed ? bFixed.textContent.trim() : '';
                     break;
-                case 8:
-                    aVal = parseInt(cellsA[8].textContent.trim()) || 0;
-                    bVal = parseInt(cellsB[8].textContent.trim()) || 0;
-                    break;
                 case 9:
-                    aVal = new Date(cellsA[9].textContent.trim());
-                    bVal = new Date(cellsB[9].textContent.trim());
+                    aVal = parseInt(cellsA[9].textContent.trim()) || 0;
+                    bVal = parseInt(cellsB[9].textContent.trim()) || 0;
+                    break;
+                case 10:
+                    aVal = new Date(cellsA[10].textContent.trim());
+                    bVal = new Date(cellsB[10].textContent.trim());
                     break;
                 default:
                     aVal = a.textContent.trim().toLowerCase();

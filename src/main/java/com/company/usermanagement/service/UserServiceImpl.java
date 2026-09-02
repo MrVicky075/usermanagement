@@ -1,5 +1,8 @@
 package com.company.usermanagement.service;
 
+import com.company.usermanagement.audit.AuditAction;
+import com.company.usermanagement.audit.AuditEntityType;
+import com.company.usermanagement.audit.AuditSnapshotUtil;
 import com.company.usermanagement.dto.ChangePasswordDTO;
 import com.company.usermanagement.dto.UserRequestDTO;
 import com.company.usermanagement.dto.UserResponseDTO;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -23,6 +27,7 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserMapper mapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
     @Override
     public UserResponseDTO createUser(UserRequestDTO request) {
@@ -35,26 +40,57 @@ public class UserServiceImpl implements UserService{
         entity.setCreatedOn(LocalDateTime.now());
         entity.setUpdatedOn(LocalDateTime.now());
 
-        return mapper.toResponse(userRepository.save(entity));
+        UserEntity saved = userRepository.save(entity);
+        auditService.log(
+                AuditAction.CREATE,
+                AuditEntityType.USER,
+                saved.getUserId(),
+                "Created user " + saved.getUserName(),
+                null,
+                AuditSnapshotUtil.userSnapshot(saved)
+        );
+        return mapper.toResponse(saved);
     }
 
     @Override
     public UserResponseDTO updateUser(Long userId, UserResponseDTO request) {
         UserEntity entity = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("User not found: " + userId));
+        Map<String, Object> before = AuditSnapshotUtil.userSnapshot(entity);
+
         if(!entity.getEmail().equalsIgnoreCase(request.getEmail())){
             if(userRepository.existsByEmail(request.getEmail())){
                 throw new BusinessException("Email already registered");
             }
-        } 
+        }
         mapper.updateEntity(entity,request);
         entity.setUpdatedOn(LocalDateTime.now());
-        return mapper.toResponse(userRepository.save(entity));
+        UserEntity saved = userRepository.save(entity);
+        Map<String, Object> after = AuditSnapshotUtil.userSnapshot(saved);
+
+        auditService.log(
+                AuditAction.UPDATE,
+                AuditEntityType.USER,
+                saved.getUserId(),
+                "Updated user " + saved.getUserName(),
+                before,
+                after
+        );
+        return mapper.toResponse(saved);
     }
 
     @Override
     public void deleteUser(Long userId) {
         UserEntity entity = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User not found"+userId));
+        Map<String, Object> before = AuditSnapshotUtil.userSnapshot(entity);
         userRepository.deleteById(userId);
+        auditService.log(
+                AuditAction.DELETE,
+                AuditEntityType.USER,
+                userId,
+                "Deleted user " + entity.getUserName(),
+                before,
+                null
+        );
     }
 
     @Override
@@ -79,9 +115,19 @@ public class UserServiceImpl implements UserService{
     @Override
     public void changeActiveStatus(Long userId) {
         UserEntity entity = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User not found"+userId));
+        Boolean oldStatus = entity.getIsActive();
         entity.setIsActive(!Boolean.TRUE.equals(entity.getIsActive()));
         entity.setUpdatedOn(LocalDateTime.now());
         userRepository.save(entity);
+
+        auditService.log(
+                AuditAction.STATUS_CHANGE,
+                AuditEntityType.USER,
+                userId,
+                "Changed user " + entity.getUserName() + " status from " + oldStatus + " to " + entity.getIsActive(),
+                AuditSnapshotUtil.singleValueMap("isActive", oldStatus),
+                AuditSnapshotUtil.singleValueMap("isActive", entity.getIsActive())
+        );
     }
 
     @Override
@@ -98,6 +144,15 @@ public class UserServiceImpl implements UserService{
         entity.setPassword(passwordEncoder.encode(request.getNewPassword()));
         entity.setUpdatedOn(LocalDateTime.now());
         userRepository.save(entity);
+
+        auditService.log(
+                AuditAction.UPDATE,
+                AuditEntityType.USER,
+                userId,
+                "Password changed for user " + entity.getUserName(),
+                null,
+                AuditSnapshotUtil.singleValueMap("passwordChanged", true)
+        );
     }
 
     @Override

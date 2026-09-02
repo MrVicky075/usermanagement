@@ -45,8 +45,11 @@ public class TaskController {
 
     @PostMapping("/saveTask")
     public String saveTask(TaskDTO taskDTO) {
-        System.out.println("TaskDTO: " + taskDTO);
-        taskService.saveTask(taskDTO);
+        if (taskDTO.getTaskId() != null) {
+            taskService.updateTask(taskDTO.getTaskId(), taskDTO);
+        } else {
+            taskService.saveTask(taskDTO);
+        }
         return "redirect:/tasks";
     }
 
